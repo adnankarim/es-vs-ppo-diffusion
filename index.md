@@ -1,3 +1,8 @@
+---
+layout: default
+use_math: true
+---
+
 # Evolution Strategies vs PPO for Coupled Diffusion Models: A Comprehensive Ablation Study Across Dimensions
 
 **Author**: Research Team  
