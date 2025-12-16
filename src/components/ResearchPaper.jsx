@@ -10,9 +10,9 @@ const ResearchPaper = () => {
         <h1>
           Evolution Strategies vs PPO for Coupled Diffusion Models: A Comprehensive Ablation Study Across Dimensions
         </h1>
-        <p><strong>Author:</strong> Research Team</p>
+        {/* <p><strong>Author:</strong> Research Team</p>
         <p><strong>Date:</strong> December 13, 2024</p>
-        <p><strong>Experiment ID:</strong> run_20251211_215609</p>
+        <p><strong>Experiment ID:</strong> run_20251211_215609</p> */}
       </header>
 
       <section className="paper-section">
@@ -400,7 +400,7 @@ Variance is controlled by mini-batch size, not dimensionality.`}
         <hr />
         
         <p style={{ fontSize: '0.9rem', color: '#666' }}>
-          <em>Last updated: December 13, 2024</em><br />
+          {/* <em>Last updated: December 13, 2024</em><br /> */}
           <em>Experiment runtime: ~18 hours on CUDA GPU</em><br />
           <em>Total configurations tested: 480 (16 ES × 6 dims + 64 PPO × 6 dims)</em>
         </p>
