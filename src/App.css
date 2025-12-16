@@ -1,21 +1,13 @@
 .app {
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-  position: relative;
-  overflow-x: hidden;
-  padding: 2rem 1rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .app {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  }
+  background: #fafbfc;
+  padding: 3rem 1.5rem;
 }
 
 @media (max-width: 768px) {
   .app {
-    padding: 1rem 0.5rem;
+    padding: 1.5rem 1rem;
   }
 }
 
