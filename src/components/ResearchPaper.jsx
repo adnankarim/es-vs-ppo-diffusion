@@ -393,10 +393,10 @@ Variance is controlled by mini-batch size, not dimensionality.`}
       </section>
 
       <footer className="paper-footer">
-        <p><strong>Acknowledgments:</strong> This work was conducted as part of research into gradient-free optimization for generative models.</p>
+        {/* <p><strong>Acknowledgments:</strong> This work was conducted as part of research into gradient-free optimization for generative models.</p>
         
         <p><strong>Code:</strong> Complete implementation available in <code>run_ablation_study.py</code> (2091 lines, documented).</p>
-        
+         */}
         <hr />
         
         <p style={{ fontSize: '0.9rem', color: '#666' }}>
