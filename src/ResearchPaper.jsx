@@ -9,9 +9,9 @@ const ResearchPaper = () => {
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
           Evolution Strategies vs PPO for Coupled Diffusion Models: A Comprehensive Ablation Study Across Dimensions
         </h1>
-        <p><strong>Author:</strong> Research Team</p>
+        {/* <p><strong>Author:</strong> Research Team</p>
         <p><strong>Date:</strong> December 13, 2024</p>
-        <p><strong>Experiment ID:</strong> run_20251211_215609</p>
+        <p><strong>Experiment ID:</strong> run_20251211_215609</p> */}
       </header>
 
       <section style={{ marginBottom: '2rem' }}>
@@ -1126,16 +1126,16 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
       </section>
 
       <footer style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '2px solid #333' }}>
-        <p><strong>Acknowledgments:</strong> This work was conducted as part of research into gradient-free optimization for generative models. We thank the diffusion models community for open-source implementations and the evolution strategies community for algorithmic insights.</p>
+        {/* <p><strong>Acknowledgments:</strong> This work was conducted as part of research into gradient-free optimization for generative models. We thank the diffusion models community for open-source implementations and the evolution strategies community for algorithmic insights.</p>
         
         <p><strong>Code:</strong> Complete implementation available in <code>run_ablation_study.py</code> (2091 lines, documented).</p>
         
-        <p><strong>Contact:</strong> For questions or collaboration, please open an issue in the project repository.</p>
+        <p><strong>Contact:</strong> For questions or collaboration, please open an issue in the project repository.</p> */}
         
         <hr style={{ margin: '2rem 0' }} />
         
         <p style={{ fontSize: '0.9rem', color: '#666' }}>
-          <em>Last updated: December 13, 2024</em><br />
+          {/* <em>Last updated: December 13, 2024</em><br /> */}
           <em>Experiment runtime: ~18 hours on CUDA GPU</em><br />
           <em>Total configurations tested: 480 (16 ES × 6 dims + 64 PPO × 6 dims)</em>
         </p>
