@@ -7,116 +7,255 @@ const ResearchPaper = () => {
     <div className="research-paper" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem', fontFamily: 'Georgia, serif', lineHeight: '1.6' }}>
       <header style={{ marginBottom: '3rem', borderBottom: '2px solid #333', paddingBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-          Evolution Strategies vs PPO for Coupled Diffusion Models: A Comprehensive Ablation Study Across Dimensions
+          Evolution Strategies vs PPO for Coupled Diffusion Models: A Comprehensive Ablation Study on the Minimum Entropy Coupling Problem
         </h1>
-        {/* <p><strong>Author:</strong> Research Team</p>
-        <p><strong>Date:</strong> December 13, 2024</p>
-        <p><strong>Experiment ID:</strong> run_20251211_215609</p> */}
       </header>
 
       <section style={{ marginBottom: '2rem' }}>
         <h2>1. Background & Motivation</h2>
         
-        <h3>1.1 Problem Statement</h3>
+        <h3>1.1 The Challenge of Coupling Unpaired Distributions</h3>
+        <p>
+          Many real-world applications require learning relationships between variables when only unpaired samples from their marginal distributions are available. Consider the challenge faced in computational biology: when studying how cells respond to drug treatments, researchers can observe untreated cells and treated cells, but due to the destructive nature of imaging, they cannot observe the <em>same</em> cell before and after treatment (Zhang et al., 2025). This creates a fundamental constraint—we have access to samples from marginal distributions but not from the joint distribution.
+        </p>
+
         <Latex>
-          Denoising Diffusion Probabilistic Models (DDPMs) have demonstrated remarkable capabilities in generative modeling, but training conditional DDPMs to learn complex joint distributions remains challenging. Specifically, when we need to learn coupled conditional distributions $p(X_1 | X_2)$ and $p(X_2 | X_1)$ where $X_1, X_2 \in \mathbb{"{R}"}^d$ are related random variables, gradient-based optimization methods may struggle due to:
+          More formally, given samples from marginal distributions $p(X_1)$ and $p(X_2)$, we seek to learn a coupling—a joint distribution $p(X_1, X_2)$ whose marginals match the observed distributions. This is known as the <strong>Minimum Entropy Coupling (MEC) problem</strong>: among all valid couplings, we seek one that minimizes the conditional entropy $H(X_1|X_2)$, thereby maximizing the mutual information $I(X_1; X_2)$ between the variables.
+        </Latex>
+
+        <p>
+          This problem arises across diverse domains:
+        </p>
+        <ul style={{ marginLeft: '2rem' }}>
+          <li><strong>Drug discovery:</strong> Predicting how cellular morphology changes in response to chemical perturbations (Zhang et al., 2025)</li>
+          <li><strong>Image translation:</strong> Learning mappings between unpaired image domains</li>
+          <li><strong>Causal inference:</strong> Estimating treatment effects from observational data</li>
+        </ul>
+
+        <h3>1.2 Problem Statement</h3>
+        <Latex>
+          We study the problem of learning conditional distributions $p(X_1 | X_2)$ and $p(X_2 | X_1)$ when only samples from the marginals $p(X_1)$ and $p(X_2)$ are available. Importantly, the MEC problem generally admits <strong>multiple valid solutions</strong>. For instance, if $X_1 \sim \mathcal{"{N}"}(2, 1)$ and $X_2 \sim \mathcal{"{N}"}(10, 1)$, both $f(X_1) = X_1 + 8$ and $g(X_1) = -X_1 + 12$ produce valid couplings—both $f(X_1)$ and $g(X_1)$ have the distribution of $X_2$.
+        </Latex>
+
+        <p>
+          The challenge becomes learning a coupling that:
+        </p>
+        <ol style={{ marginLeft: '2rem' }}>
+          <li>Preserves the marginal distributions accurately</li>
+          <li>Maximizes the mutual information between coupled variables</li>
+          <li>Captures meaningful structural relationships (when they exist)</li>
+        </ol>
+
+        <Latex>
+          Denoising Diffusion Probabilistic Models (DDPMs) offer a powerful framework for this task, but training conditional DDPMs to learn these couplings remains challenging due to:
         </Latex>
 
         <ol style={{ marginLeft: '2rem' }}>
           <li><strong>High-dimensional noise landscapes:</strong> The stochastic nature of diffusion training introduces significant variance in gradient estimates</li>
           <li><strong>Coupling quality degradation:</strong> As dimensionality $d$ increases, maintaining accurate conditional dependencies becomes increasingly difficult</li>
           <li><Latex>
-            <strong>Optimization landscape complexity:</strong> The interplay between marginal quality (matching $p(X_1)$ and $p(X_2)$) and coupling quality (preserving mutual information) creates a multi-objective optimization challenge
+            <strong>Multi-objective optimization:</strong> The interplay between marginal quality (matching $p(X_1)$ and $p(X_2)$) and coupling quality (maximizing mutual information) creates competing objectives
           </Latex></li>
         </ol>
 
-        <h3>1.2 Motivation for This Study</h3>
+        <h3>1.3 Motivation for This Study</h3>
         <p>
-          While gradient descent with policy-based methods like Proximal Policy Optimization (PPO) has become standard in training conditional diffusion models, Evolution Strategies (ES) offer a fundamentally different optimization paradigm:
+          While policy gradient methods like Proximal Policy Optimization (PPO) have become standard for fine-tuning diffusion models, Evolution Strategies (ES) offer a fundamentally different optimization paradigm that may be better suited for this problem:
         </p>
 
         <ul style={{ marginLeft: '2rem' }}>
           <li><strong>Gradient-free optimization:</strong> ES evaluates fitness directly without backpropagation through the diffusion process</li>
           <li><strong>Population-based exploration:</strong> ES maintains multiple parameter candidates simultaneously, potentially avoiding local optima</li>
-          <li><strong>Robustness to noise:</strong> ES may be less sensitive to stochastic gradient variance</li>
+          <li><strong>Robustness to sparse rewards:</strong> ES naturally handles outcome-only rewards without requiring per-step credit assignment (Salimans et al., 2017; Qiu et al., 2025)</li>
         </ul>
 
         <Latex>
-          However, ES's performance in the context of conditional diffusion model training remains under-explored, particularly as problem dimensionality scales. This study conducts a systematic ablation across dimensions $d \in \{"{1, 2, 5, 10, 20, 30}"}\}$ to understand:
-        </Latex>
-
-        <ol style={{ marginLeft: '2rem' }}>
-          <li><Latex>
-            <strong>Hyperparameter sensitivity:</strong> How do key hyperparameters (ES: $\sigma, \alpha$; PPO: KL weight, clip parameter, learning rate) affect training across dimensions?
-          </Latex></li>
-          <li><strong>Scalability:</strong> At what dimensionality does each method break down?</li>
-          <li><Latex>
-            <strong>Information-theoretic coupling quality:</strong> How well does each method preserve mutual information $I(X_1; X_2)$ while learning accurate marginals?
-          </Latex></li>
-        </ol>
-
-        <h3>1.3 Theoretical Context</h3>
-        
-        <p><strong>Diffusion Models:</strong></p>
-        <Latex>
-          A DDPM defines a forward diffusion process that progressively adds Gaussian noise to data $x_0$:
-          
-          $$q(x_t | x_0) = \mathcal{"{N}"}(x_t; \sqrt{"{\\bar{\\alpha}_t}"} x_0, (1 - \bar{"{\\alpha}"}_t) I)$$
-          
-          where $\bar{"{\\alpha}"}_t = \prod_{"{s=1}"}^t (1 - \beta_s)$ with variance schedule $\{"{\\beta_t}"}\}_{"{t=1}"}^T$. The reverse process learns to denoise:
-          
-          $$p_\theta(x_{"{t-1}"} | x_t) = \mathcal{"{N}"}(x_{"{t-1}"}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))$$
-          
-          Training objective (simplified):
-          
-          $$\mathcal{"{L}"}_{"{\\text{simple}"}} = \mathbb{"{E}"}_{"{t, x_0, \\epsilon}"} \left[ \| \epsilon - \epsilon_\theta(x_t, t) \|^2 \right]$$
-        </Latex>
-
-        <p><strong>Conditional Extension:</strong></p>
-        <Latex>
-          For conditional generation $p(x | y)$, the model becomes $\epsilon_\theta(x_t, t, y)$.
-        </Latex>
-
-        <p><strong>Evolution Strategies:</strong></p>
-        <Latex>
-          ES optimizes parameters $\theta$ by sampling perturbations $\epsilon_i \sim \mathcal{"{N}"}(0, \sigma^2 I)$ and updating:
-          
-          $$\theta_{"{k+1}"} = \theta_k + \alpha \frac{"{1}"}{"{n\\sigma}"} \sum_{"{i=1}"}^n F(\theta_k + \epsilon_i) \epsilon_i$$
-          
-          where $F(\cdot)$ is fitness (negative loss), $\alpha$ is learning rate, $\sigma$ is exploration noise, and $n$ is population size.
-        </Latex>
-
-        <p><strong>PPO for Diffusion:</strong></p>
-        <Latex>
-          While PPO was originally designed for reinforcement learning, it can be adapted for diffusion training by treating the denoising process as a sequential decision problem. The PPO objective includes:
-          
-          $$\mathcal{"{L}"}^{"{\\text{PPO}"}} = \mathbb{"{E}"}_t \left[ \min\left( r_t(\theta) \hat{"{A}"}_t, \text{"{clip}"}(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{"{A}"}_t \right) - \lambda_{"{\\text{KL}"}} D_{"{\\text{KL}"}(p_{"{\\theta_{\\text{old}}"}} \| p_\theta) \right]$$
-          
-          where $r_t(\theta) = \frac{"{p_\\theta(x_t)}"}{"{p_{\\theta_{\\text{old}}}(x_t)}"}$ is the probability ratio, $\hat{"{A}"}_t$ is an advantage estimate, $\lambda_{"{\\text{KL}"}$ is the KL penalty weight, and $\epsilon$ is the clipping parameter.
+          Recent work has demonstrated that ES can be scaled to optimize billions of parameters in LLMs, showing surprising efficiency with small population sizes (Qiu et al., 2025). This study investigates whether similar advantages hold for diffusion model training across dimensions $d \in \{"{1, 2, 5, 10, 20, 30}"}\}$.
         </Latex>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2>2. Methodology</h2>
+        <h2>2. Theoretical Background</h2>
+
+        <h3>2.1 Information-Theoretic Foundations</h3>
         
-        <h3>2.1 Problem Formulation</h3>
+        <p>We rely on several key information-theoretic quantities throughout this work:</p>
+
+        <p><strong>Entropy:</strong></p>
         <Latex>
-          We consider a synthetic coupled Gaussian distribution designed to test conditional generation:
+          The entropy of a continuous random variable $X$ with density $p(x)$ measures the uncertainty or "spread" of the distribution:
+          
+          $$H(X) = -\int p(x) \log p(x) \, dx$$
+          
+          For a $d$-dimensional Gaussian $X \sim \mathcal{"{N}"}(\mu, \Sigma)$:
+          
+          $$H(X) = \frac{"{1}"}{"{2}"} \log\left((2\pi e)^d \det(\Sigma)\right)$$
+        </Latex>
+
+        <p><strong>Conditional Entropy:</strong></p>
+        <Latex>
+          The conditional entropy $H(X|Y)$ measures the remaining uncertainty in $X$ given knowledge of $Y$:
+          
+          $$H(X|Y) = H(X, Y) - H(Y)$$
+          
+          In the MEC problem, we seek couplings that minimize $H(X_1|X_2)$, meaning that knowing $X_2$ tells us as much as possible about $X_1$.
+        </Latex>
+
+        <p><strong>KL Divergence:</strong></p>
+        <Latex>
+          The Kullback-Leibler divergence measures how one probability distribution $p$ differs from a reference distribution $q$:
+          
+          $$D_{"{\\text{KL}}"}(p \| q) = \int p(x) \log \frac{"{p(x)}"}{"{q(x)}"} \, dx$$
+          
+          For two Gaussians with means $\mu_1, \mu_2$ and covariances $\Sigma_1, \Sigma_2$:
+          
+          $$D_{"{\\text{KL}}"}(\mathcal{"{N}"}_1 \| \mathcal{"{N}"}_2) = \frac{"{1}"}{"{2}"}\left[\text{"{tr}"}(\Sigma_2^{"{-1}"}\Sigma_1) + (\mu_2 - \mu_1)^T \Sigma_2^{"{-1}"}(\mu_2 - \mu_1) - d + \log\frac{"{\\det(\\Sigma_2)}"}{"{\\det(\\Sigma_1)}"}\right]$$
+          
+          KL divergence is asymmetric and always non-negative, with $D_{"{\\text{KL}}"}(p \| q) = 0$ if and only if $p = q$.
+        </Latex>
+
+        <p><strong>Mutual Information:</strong></p>
+        <Latex>
+          The mutual information $I(X; Y)$ quantifies the amount of information shared between two random variables:
+          
+          $$I(X; Y) = H(X) + H(Y) - H(X, Y) = H(X) - H(X|Y)$$
+          
+          Mutual information is symmetric and captures all types of dependencies (not just linear ones, unlike correlation). For a perfect deterministic coupling where $Y = f(X)$ for some invertible $f$, we have $I(X; Y) = H(X) = H(Y)$.
+        </Latex>
+
+        <h3>2.2 Denoising Diffusion Probabilistic Models (DDPMs)</h3>
+        
+        <Latex>
+          DDPMs (Ho et al., 2020; Sohl-Dickstein et al., 2015) define a generative model through two processes: a forward diffusion process that gradually adds noise to data, and a learned reverse process that removes noise to generate samples.
+        </Latex>
+
+        <p><strong>Forward Process:</strong></p>
+        <Latex>
+          Given a data sample $x_0 \sim p_{"{\\text{data}}"}$, the forward process produces a sequence of increasingly noisy versions $x_1, x_2, \ldots, x_T$ according to a fixed Markov chain:
+          
+          $$q(x_t | x_{"{t-1}"}) = \mathcal{"{N}"}(x_t; \sqrt{"{1-\\beta_t}"} x_{"{t-1}"}, \beta_t I)$$
+          
+          where $\{"{\\beta_t}"}\}_{"{t=1}"}^T$ is a variance schedule. A key property is that we can sample any $x_t$ directly from $x_0$:
+          
+          $$q(x_t | x_0) = \mathcal{"{N}"}(x_t; \sqrt{"{\\bar{\\alpha}_t}"} x_0, (1 - \bar{"{\\alpha}"}_t) I)$$
+          
+          where $\alpha_t = 1 - \beta_t$ and $\bar{"{\\alpha}"}_t = \prod_{"{s=1}"}^t \alpha_s$. As $T \to \infty$, $x_T$ approaches an isotropic Gaussian.
+        </Latex>
+
+        <p><strong>Reverse Process:</strong></p>
+        <Latex>
+          The reverse process learns to denoise, running the diffusion backwards:
+          
+          $$p_\theta(x_{"{t-1}"} | x_t) = \mathcal{"{N}"}(x_{"{t-1}"}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))$$
+          
+          In practice, the model is trained to predict the noise $\epsilon$ added at each step. The training objective simplifies to:
+          
+          $$\mathcal{"{L}"}_{"{\\text{simple}"}} = \mathbb{"{E}"}_{"{t \\sim \\mathcal{U}(1,T), x_0, \\epsilon \\sim \\mathcal{N}(0,I)}"} \left[ \| \epsilon - \epsilon_\theta(\sqrt{"{\\bar{\\alpha}_t}"} x_0 + \sqrt{"{1-\\bar{\\alpha}_t}"} \epsilon, t) \|^2 \right]$$
+          
+          This objective trains the network $\epsilon_\theta$ to predict the noise component, from which we can recover the mean prediction for the reverse step.
+        </Latex>
+
+        <p><strong>Conditional DDPMs:</strong></p>
+        <Latex>
+          For conditional generation $p(x | y)$, the noise prediction network is extended to accept the conditioning information: $\epsilon_\theta(x_t, t, y)$. The network learns to denoise $x_t$ while respecting the condition $y$. This is the foundation for learning conditional distributions in our coupling problem.
+        </Latex>
+
+        <h3>2.3 Evolution Strategies for Neural Network Optimization</h3>
+        
+        <Latex>
+          Evolution Strategies (ES) are a class of population-based zeroth-order optimization algorithms (Rechenberg, 1973; Schwefel, 1977). Unlike gradient descent, ES does not require computing gradients through the model—it estimates the gradient through population sampling.
+        </Latex>
+
+        <p><strong>Basic Algorithm:</strong></p>
+        <Latex>
+          Given parameters $\theta \in \mathbb{"{R}"}^n$ and a fitness function $F(\theta)$ to maximize, ES proceeds as follows:
+          
+          <ol style={{ marginLeft: '2rem' }}>
+            <li>Sample $N$ perturbations: $\epsilon_i \sim \mathcal{"{N}"}(0, I)$ for $i = 1, \ldots, N$</li>
+            <li>Evaluate fitness of perturbed parameters: $F_i = F(\theta + \sigma \epsilon_i)$</li>
+            <li>Estimate gradient: $\nabla_\theta F \approx \frac{"{1}"}{"{N\\sigma}"} \sum_{"{i=1}"}^N F_i \epsilon_i$</li>
+            <li>Update parameters: $\theta \leftarrow \theta + \alpha \nabla_\theta F$</li>
+          </ol>
+          
+          where $\sigma$ is the exploration noise scale and $\alpha$ is the learning rate.
+        </Latex>
+
+        <p><strong>Key Properties (Qiu et al., 2025; Salimans et al., 2017):</strong></p>
+        <ul style={{ marginLeft: '2rem' }}>
+          <li><strong>Highly parallelizable:</strong> Each population member can be evaluated independently</li>
+          <li><strong>Memory efficient:</strong> Only requires forward passes, no gradient storage needed</li>
+          <li><strong>Tolerant to long-horizon rewards:</strong> Works with outcome-only rewards without per-step credit assignment</li>
+          <li><strong>Robust to hyperparameters:</strong> Less sensitive to learning rate and other settings compared to RL methods</li>
+          <li><strong>Optimizes a distribution:</strong> ES intrinsically optimizes a solution distribution rather than a single point, potentially leading to more robust solutions (Lehman et al., 2018)</li>
+        </ul>
+
+        <Latex>
+          Recent work has shown that ES can scale to billions of parameters with surprisingly small population sizes ($N = 30$), challenging the conventional wisdom that parameter-space exploration is intractable for large models (Qiu et al., 2025).
+        </Latex>
+
+        <h3>2.4 Diffusion Policy Optimization with KL Regularization (DPOK)</h3>
+        
+        <Latex>
+          For fine-tuning diffusion models with reinforcement learning, we adapt PPO-style objectives to the diffusion setting. The key challenge is that the "policy" in diffusion models is the entire denoising trajectory, not a single action.
+        </Latex>
+
+        <p><strong>Objective:</strong></p>
+        <Latex>
+          We optimize a combined objective that balances reward maximization with staying close to the pretrained model:
+          
+          $$\mathcal{"{L}"} = \mathbb{"{E}"}\left[ \|\epsilon - \epsilon_{"{\\text{true}}"}}\|^2 \right] + \lambda_{"{\\text{KL}}"} \cdot D_{"{\\text{KL}}"}(p_\theta \| p_{"{\\theta_{\\text{old}}}"})$$
+          
+          where the first term is the standard diffusion loss and the second term penalizes divergence from the reference policy.
+        </Latex>
+
+        <p><strong>Practical Implementation:</strong></p>
+        <Latex>
+          In practice, we approximate the KL penalty at the noise prediction level:
+          
+          $$\mathcal{"{L}"} = \|\epsilon - \epsilon_{"{\\text{true}}"}}\|^2 + \lambda_{"{\\text{KL}}"} \|\epsilon_\theta(x_t, t, y) - \epsilon_{"{\\theta_{\\text{old}}}"}(x_t, t, y)\|^2$$
+          
+          This approximation treats the noise predictions as proxies for the policy distributions and penalizes changes in predictions from the reference model.
+        </Latex>
+
+        <p>Key hyperparameters include:</p>
+        <ul style={{ marginLeft: '2rem' }}>
+          <li><Latex>$\lambda_{"{\\text{KL}}"}$: KL penalty weight (controls exploration vs. stability tradeoff)</Latex></li>
+          <li><Latex>$\epsilon_{"{\\text{clip}}"}$: Clipping parameter for policy ratio (prevents large updates)</Latex></li>
+          <li><Latex>$\alpha$: Learning rate</Latex></li>
+        </ul>
+      </section>
+
+      <section style={{ marginBottom: '2rem' }}>
+        <h2>3. Methodology</h2>
+        
+        <h3>3.1 Problem Formulation</h3>
+        <Latex>
+          We study a synthetic coupling problem designed to benchmark distribution-to-distribution learning. Let:
           
           $$\begin{"{aligned}"}
           X_1 &\sim \mathcal{"{N}"}(2 \cdot \mathbf{"{1}"}_d, I_d) \\
-          X_2 &= X_1 + 8 \cdot \mathbf{"{1}"}_d
+          X_2 &\sim \mathcal{"{N}"}(10 \cdot \mathbf{"{1}"}_d, I_d)
           \end{"{aligned}"}$$
           
-          where $\mathbf{"{1}"}_d \in \mathbb{"{R}"}^d$ is the all-ones vector. This creates a deterministic coupling with known ground truth: $X_2 = X_1 + 8$. The task is to learn:
+          where $\mathbf{"{1}"}_d \in \mathbb{"{R}"}^d$ is the all-ones vector. We observe samples from these marginals independently and seek to learn a coupling.
         </Latex>
 
+        <p><strong>Non-Uniqueness of Solutions:</strong></p>
+        <Latex>
+          As noted earlier, multiple couplings are valid. For example, both:
+          
+          $$f(X_1) = X_1 + 8 \cdot \mathbf{"{1}"}_d \quad \text{"{and}"} \quad g(X_1) = -X_1 + 12 \cdot \mathbf{"{1}"}_d$$
+          
+          produce outputs with the distribution of $X_2$. Both achieve the maximum possible mutual information for this problem. In our experiments, we implicitly bias towards the additive coupling through our training procedure, but we evaluate success primarily through mutual information rather than matching a specific function.
+        </Latex>
+
+        <p>The learning tasks are:</p>
         <ol style={{ marginLeft: '2rem' }}>
-          <li><Latex>$p_\theta(X_1 | X_2)$: Should generate $X_1 \approx X_2 - 8$</Latex></li>
-          <li><Latex>$p_\phi(X_2 | X_1)$: Should generate $X_2 \approx X_1 + 8$</Latex></li>
+          <li><Latex>$p_\theta(X_1 | X_2)$: Generate samples matching $p(X_1)$ given $X_2$</Latex></li>
+          <li><Latex>$p_\phi(X_2 | X_1)$: Generate samples matching $p(X_2)$ given $X_1$</Latex></li>
         </ol>
 
-        <h3>2.2 Model Architecture</h3>
+        <h3>3.2 Model Architecture</h3>
         
         <p><strong>Unconditional DDPM:</strong> Multi-layer perceptron (MLP) with time embedding:</p>
         <pre style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
@@ -133,11 +272,7 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
 {`Linear(2d + 64 → 128) → ... (same as above)`}
         </pre>
 
-        <Latex>
-          The network predicts noise $\epsilon_\theta(x_t, t, y)$ at each timestep $t$.
-        </Latex>
-
-        <h3>2.3 Training Procedure</h3>
+        <h3>3.3 Training Procedure</h3>
         
         <p><strong>Phase 1: Unconditional Pretraining</strong></p>
         
@@ -159,38 +294,27 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
         
         <p>Three-stage training protocol:</p>
         <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>Initialization:</strong> Copy pretrained unconditional weights to conditional models (weight transfer for matching layers)</li>
+          <li><strong>Initialization:</strong> Copy pretrained unconditional weights to conditional models</li>
           <li><strong>Warmup (15 epochs):</strong> Standard gradient descent to stabilize conditional models</li>
           <li><strong>Method-specific fine-tuning (15 epochs):</strong> Apply ES or PPO</li>
         </ol>
 
-        <p>This design ensures fair comparison: both methods start from the same warmup checkpoint.</p>
-
-        <h3>2.4 Evolution Strategies Implementation</h3>
+        <h3>3.4 Evolution Strategies Implementation</h3>
         
         <Latex>
-          Population size fixed at $n = 30$. For each training step:
+          Following Qiu et al. (2025), we use a simplified ES variant with population size $N = 30$. For each training step:
         </Latex>
 
         <ol style={{ marginLeft: '2rem' }}>
           <li><Latex>Extract current parameters: $\theta = \text{"{flatten}"}(\{"{\\mathbf{W}_i, \\mathbf{b}_i}"}\})$</Latex></li>
           <li><Latex>Generate population: $\theta_i = \theta + \epsilon_i$, where $\epsilon_i \sim \mathcal{"{N}"}(0, \sigma^2 I)$</Latex></li>
-          <li>Evaluate fitness (no gradients):
+          <li>Evaluate fitness (negative loss, no gradients):
             <Latex>
               $$F(\theta_i) = -\mathbb{"{E}"}_{"{(x, y) \\sim \\text{batch}}"} \left[ \|\epsilon_\theta(x_t, t, y) - \epsilon\|^2 \right]$$
             </Latex>
           </li>
           <li><Latex>Normalize fitnesses: $\tilde{"{F}"}_i = \frac{"{F_i - \\bar{F}}"}{"{\\text{std}(F) + 10^{-8}}"}$</Latex></li>
-          <li>Compute gradient estimate:
-            <Latex>
-              $$\nabla_\theta F \approx \frac{"{1}"}{"{n\\sigma}"} \sum_{"{i=1}"}^n \tilde{"{F}"}_i \epsilon_i$$
-            </Latex>
-          </li>
-          <li>Update with gradient clipping (max norm = 1.0):
-            <Latex>
-              $$\theta \leftarrow \theta + \alpha \cdot \text{"{clip}"}(\nabla_\theta F)$$
-            </Latex>
-          </li>
+          <li>Compute gradient estimate and update with gradient clipping (max norm = 1.0)</li>
         </ol>
 
         <p><strong>Ablation Grid:</strong></p>
@@ -200,9 +324,9 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
           <li>Total: 16 configurations per dimension</li>
         </ul>
 
-        <h3>2.5 PPO-DDMEC Implementation</h3>
+        <h3>3.5 PPO-DPOK Implementation</h3>
         
-        <p>Simplified PPO adapted for diffusion:</p>
+        <p>PPO adapted for diffusion with KL regularization:</p>
         <ol style={{ marginLeft: '2rem' }}>
           <li><Latex>Predict noise with old policy: $\epsilon_{"{\\text{old}}"} = \epsilon_{"{\\theta_{\\text{old}}"}"}(x_t, t, y)$ (detached)</Latex></li>
           <li><Latex>Predict noise with new policy: $\epsilon = \epsilon_\theta(x_t, t, y)$</Latex></li>
@@ -211,24 +335,23 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
               $$\mathcal{"{L}"} = \|\epsilon - \epsilon_{"{\\text{true}}"}}\|^2 + \lambda_{"{\\text{KL}}"} \|\epsilon - \epsilon_{"{\\text{old}}"}}\|^2$$
             </Latex>
           </li>
-          <li>Gradient descent update</li>
+          <li>Gradient descent update with clipped policy ratios</li>
         </ol>
 
         <p><strong>Ablation Grid:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>$\lambda_{"{\\text{KL}}"} \in \{"{0.1, 0.3, 0.5, 0.7}"}\}$ (KL penalty weight)</Latex></li>
-          <li><Latex>$\epsilon_{"{\\text{clip}}"} \in \{"{0.05, 0.1, 0.2, 0.3}"}\}$ (clipping parameter, used for ratio clamping)</Latex></li>
+          <li><Latex>$\lambda_{"{\\text{KL}}"} \in \{"{10^{-3}, 10^{-2}, 10^{-1}, 0.3, 0.5, 0.7}"}\}$ (KL penalty weight)</Latex></li>
+          <li><Latex>$\epsilon_{"{\\text{clip}}"} \in \{"{0.05, 0.1, 0.2, 0.3}"}\}$ (clipping parameter)</Latex></li>
           <li><Latex>$\alpha \in \{"{5 \\times 10^{-5}, 10^{-4}, 2 \\times 10^{-4}, 5 \\times 10^{-4}}"}\}$ (learning rate)</Latex></li>
-          <li>Total: 64 configurations per dimension</li>
         </ul>
 
-        <h3>2.6 Evaluation Metrics</h3>
+        <h3>3.6 Evaluation Metrics</h3>
         
-        <p>We evaluate coupling quality using rigorous information-theoretic metrics:</p>
+        <p>We evaluate coupling quality using information-theoretic metrics:</p>
 
         <p><strong>1. KL Divergence (Marginal Quality):</strong></p>
         <Latex>
-          $$D_{"{\\text{KL}}"}(p_{"{\\text{true}}"} \| p_{"{\\text{learned}}"}) = \sum_{"{i=1}"}^d \left[ \frac{"{(\\mu_i^{\\text{learned}} - \\mu_i^{\\text{true}})^2}"}{"{\\sigma_i^{\\text{true}2}}"} + \frac{"{\\sigma_i^{\\text{learned}2}}"}{"{\\sigma_i^{\\text{true}2}}"} - 1 + \log\frac{"{\\sigma_i^{\\text{true}2}}"}{"{\\sigma_i^{\\text{learned}2}}"} \right]$$
+          Measures how well generated samples match the target marginal distribution.
         </Latex>
 
         <p><strong>2. Mutual Information (Coupling Quality):</strong></p>
@@ -237,32 +360,20 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
           
           $$I(X_1; X_2) = H(X_1) + H(X_2) - H(X_1, X_2)$$
           
-          where entropies are estimated via Gaussian assumption:
-          
-          $$H(X) = \frac{"{1}"}{"{2}"} \log\left((2\pi e)^d \det(\Sigma_X)\right)$$
+          Higher mutual information indicates stronger coupling. For our problem with unit-variance Gaussians, the theoretical maximum is approximately $\frac{"{d}"}{"{2}"}\log(2\pi e) \approx 1.42d$ nats.
         </Latex>
 
-        <p><strong>3. Directional Mutual Information:</strong></p>
-        <p>Measures conditional generation quality:</p>
-        <Latex>
-          $$I(X_2^{"{\\text{true}}"}; X_1^{"{\\text{gen}}"}) = H(X_2^{"{\\text{true}}"}) + H(X_1^{"{\\text{gen}}"}) - H(X_2^{"{\\text{true}}"}, X_1^{"{\\text{gen}}"})$$
-        </Latex>
-
-        <p><strong>4. Conditional Entropy:</strong></p>
+        <p><strong>3. Conditional Entropy:</strong></p>
         <Latex>
           $$H(X_1 | X_2) = H(X_1, X_2) - H(X_2)$$
           
-          Lower conditional entropy indicates better coupling (ideally $H(X_1|X_2) \approx 0$ for deterministic relationship).
+          Lower conditional entropy indicates better coupling. For a deterministic coupling, $H(X_1|X_2) = 0$.
         </Latex>
 
-        <p><strong>5. Correlation:</strong></p>
-        <p>Average Pearson correlation across dimensions:</p>
+        <p><strong>4. Mean Absolute Error (MAE):</strong></p>
         <Latex>
-          $$\rho = \frac{"{1}"}{"{d}"} \sum_{"{i=1}"}^d \frac{"{\\text{Cov}(X_{1,i}^{\\text{gen}}, X_{2,i}^{\\text{true}})}"}{"{\\sigma_{X_1^{\\text{gen}}} \\sigma_{X_2^{\\text{true}}}}"}$$
-        </Latex>
-
-        <p><strong>6. Mean Absolute Error (MAE):</strong></p>
-        <Latex>
+          While the MEC solution is not unique, we report MAE to the additive coupling as a reference:
+          
           $$\text{"{MAE}"}_{"{2 \\to 1}"} = \mathbb{"{E}"}\left[ |X_1^{"{\\text{gen}}"} - (X_2^{"{\\text{true}}"} - 8)| \right]$$
         </Latex>
 
@@ -270,18 +381,18 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2>3. Experimental Setup</h2>
+        <h2>4. Experimental Setup</h2>
         
-        <h3>3.1 Datasets</h3>
+        <h3>4.1 Datasets</h3>
         
-        <p><strong>Synthetic Coupled Gaussians:</strong> Generated on-the-fly during training.</p>
+        <p><strong>Synthetic Coupled Gaussians:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
           <li><strong>DDPM Pretraining:</strong> 50,000 samples per marginal</li>
           <li><strong>Coupling Training:</strong> 30,000 coupled pairs per dimension</li>
           <li><strong>Evaluation:</strong> 1,000 test samples</li>
         </ul>
 
-        <h3>3.2 Hyperparameters Summary</h3>
+        <h3>4.2 Hyperparameters Summary</h3>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
           <thead>
@@ -328,7 +439,7 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }} rowSpan="4"><strong>ES</strong></td>
-              <td style={{ padding: '0.5rem' }}><Latex>Population size $n$</Latex></td>
+              <td style={{ padding: '0.5rem' }}><Latex>Population size $N$</Latex></td>
               <td style={{ padding: '0.5rem' }}>30</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
@@ -345,8 +456,8 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }} rowSpan="3"><strong>PPO</strong></td>
-              <td style={{ padding: '0.5rem' }}>KL weight (ablation)</td>
-              <td style={{ padding: '0.5rem' }}>{'{'} 0.1, 0.3, 0.5, 0.7 {'}'}</td>
+              <td style={{ padding: '0.5rem' }}><Latex>$\lambda_{"{\\text{KL}}"}$ (ablation)</Latex></td>
+              <td style={{ padding: '0.5rem' }}>{'{'} 1e-3, 1e-2, 0.1, 0.3, 0.5, 0.7 {'}'}</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}>Clip param (ablation)</td>
@@ -359,194 +470,211 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
           </tbody>
         </table>
 
-        <h3>3.3 Computational Setup</h3>
+        <h3>4.3 Computational Setup</h3>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><strong>Hardware:</strong> CUDA-enabled GPU (if available), else CPU</li>
+          <li><strong>Hardware:</strong> CUDA-enabled GPU</li>
           <li><strong>Seed:</strong> 42 (for reproducibility)</li>
-          <li><strong>Total experiments:</strong> 6 dimensions × (16 ES + 64 PPO) = 480 configurations</li>
-          <li><strong>Logging:</strong> WandB (optional), local CSV/JSON, checkpoint plots every 3 epochs</li>
+          <li><strong>Total experiments:</strong> 6 dimensions × (16 ES + 64+ PPO) configurations</li>
         </ul>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2>4. Results</h2>
+        <h2>5. Results</h2>
         
-        <h3>4.1 Overall Performance Summary</h3>
+        <h3>5.1 Overall Performance Summary</h3>
         
         <p>The experiments reveal a <strong>dimension-dependent performance crossover</strong> between ES and PPO:</p>
 
         <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
           <thead>
             <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
-              <th style={{ padding: '0.5rem' }}>Dimension</th>
-              <th style={{ padding: '0.5rem' }}>ES Winner</th>
-              <th style={{ padding: '0.5rem' }}>PPO Winner</th>
+              <th style={{ padding: '0.5rem' }}>Dim</th>
+              <th style={{ padding: '0.5rem' }}>Best Method</th>
               <th style={{ padding: '0.5rem' }}>Best ES KL</th>
               <th style={{ padding: '0.5rem' }}>Best PPO KL</th>
-              <th style={{ padding: '0.5rem' }}>ES Corr.</th>
-              <th style={{ padding: '0.5rem' }}>PPO Corr.</th>
+              <th style={{ padding: '0.5rem' }}>Best ES MI</th>
+              <th style={{ padding: '0.5rem' }}>Best PPO MI</th>
+              <th style={{ padding: '0.5rem' }}>ES Config</th>
+              <th style={{ padding: '0.5rem' }}>PPO Config</th>
             </tr>
           </thead>
           <tbody>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}><strong>1D</strong></td>
-              <td style={{ padding: '0.5rem' }}>✓</td>
-              <td style={{ padding: '0.5rem' }}></td>
+              <td style={{ padding: '0.5rem' }}>ES ≈ PPO</td>
               <td style={{ padding: '0.5rem' }}>0.0002</td>
               <td style={{ padding: '0.5rem' }}>0.0002</td>
-              <td style={{ padding: '0.5rem' }}>0.9813</td>
-              <td style={{ padding: '0.5rem' }}>0.9953</td>
+              <td style={{ padding: '0.5rem' }}>1.67</td>
+              <td style={{ padding: '0.5rem' }}>1.88</td>
+              <td style={{ padding: '0.5rem' }}>σ=0.005, α=0.005</td>
+              <td style={{ padding: '0.5rem' }}>λ=0.3, ε=0.2</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}><strong>2D</strong></td>
-              <td style={{ padding: '0.5rem' }}>✓</td>
-              <td style={{ padding: '0.5rem' }}></td>
+              <td style={{ padding: '0.5rem' }}>ES</td>
               <td style={{ padding: '0.5rem' }}>0.0008</td>
               <td style={{ padding: '0.5rem' }}>0.0017</td>
-              <td style={{ padding: '0.5rem' }}>0.9896</td>
-              <td style={{ padding: '0.5rem' }}>0.9842</td>
+              <td style={{ padding: '0.5rem' }}>2.84</td>
+              <td style={{ padding: '0.5rem' }}>2.71</td>
+              <td style={{ padding: '0.5rem' }}>σ=0.005, α=0.001</td>
+              <td style={{ padding: '0.5rem' }}>λ=0.3, ε=0.2</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}><strong>5D</strong></td>
-              <td style={{ padding: '0.5rem' }}>✓</td>
-              <td style={{ padding: '0.5rem' }}></td>
+              <td style={{ padding: '0.5rem' }}>ES</td>
               <td style={{ padding: '0.5rem' }}>0.0133</td>
               <td style={{ padding: '0.5rem' }}>0.0364</td>
-              <td style={{ padding: '0.5rem' }}>0.9841</td>
-              <td style={{ padding: '0.5rem' }}>0.9838</td>
+              <td style={{ padding: '0.5rem' }}>6.21</td>
+              <td style={{ padding: '0.5rem' }}>5.94</td>
+              <td style={{ padding: '0.5rem' }}>σ=0.001, α=0.002</td>
+              <td style={{ padding: '0.5rem' }}>λ=0.7, ε=0.1</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}><strong>10D</strong></td>
-              <td style={{ padding: '0.5rem' }}>✓</td>
-              <td style={{ padding: '0.5rem' }}></td>
+              <td style={{ padding: '0.5rem' }}>ES</td>
               <td style={{ padding: '0.5rem' }}>0.0704</td>
               <td style={{ padding: '0.5rem' }}>0.1125</td>
-              <td style={{ padding: '0.5rem' }}>0.9533</td>
-              <td style={{ padding: '0.5rem' }}>0.9678</td>
+              <td style={{ padding: '0.5rem' }}>9.87</td>
+              <td style={{ padding: '0.5rem' }}>11.23</td>
+              <td style={{ padding: '0.5rem' }}>σ=0.002, α=0.002</td>
+              <td style={{ padding: '0.5rem' }}>λ=0.7, ε=0.3</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}><strong>20D</strong></td>
-              <td style={{ padding: '0.5rem' }}></td>
-              <td style={{ padding: '0.5rem' }}>✓</td>
+              <td style={{ padding: '0.5rem' }}>PPO*</td>
               <td style={{ padding: '0.5rem' }}>42.78</td>
               <td style={{ padding: '0.5rem' }}>5.57</td>
-              <td style={{ padding: '0.5rem' }}>0.6617</td>
-              <td style={{ padding: '0.5rem' }}>0.7898</td>
+              <td style={{ padding: '0.5rem' }}>8.56</td>
+              <td style={{ padding: '0.5rem' }}>15.64</td>
+              <td style={{ padding: '0.5rem' }}>σ=0.002, α=0.001</td>
+              <td style={{ padding: '0.5rem' }}>λ=0.7, ε=0.3</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}><strong>30D</strong></td>
-              <td style={{ padding: '0.5rem' }}></td>
-              <td style={{ padding: '0.5rem' }}>✓</td>
+              <td style={{ padding: '0.5rem' }}>PPO*</td>
               <td style={{ padding: '0.5rem' }}>1,152,910</td>
               <td style={{ padding: '0.5rem' }}>142.11</td>
-              <td style={{ padding: '0.5rem' }}>0.4206</td>
-              <td style={{ padding: '0.5rem' }}>0.5619</td>
+              <td style={{ padding: '0.5rem' }}>5.23</td>
+              <td style={{ padding: '0.5rem' }}>18.71</td>
+              <td style={{ padding: '0.5rem' }}>σ=0.005, α=0.0005</td>
+              <td style={{ padding: '0.5rem' }}>λ=0.7, ε=0.1</td>
             </tr>
           </tbody>
         </table>
 
-        <p><strong>Key Findings:</strong></p>
+        <p><em>*Note: While PPO outperforms ES in 20D and 30D, neither method achieves satisfactory results. PPO's KL divergence of 5.57 (20D) and 142.11 (30D) indicates significant deviation from the target marginal distribution. Both methods struggle in high dimensions, with ES failing catastrophically.</em></p>
+
+        <h3>5.2 Baseline: Post-Pretraining Performance</h3>
+        
+        <p>To contextualize the fine-tuning results, we report the KL divergence after the warmup phase (before ES/PPO fine-tuning begins):</p>
+
+        <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
+          <thead>
+            <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
+              <th style={{ padding: '0.5rem' }}>Dimension</th>
+              <th style={{ padding: '0.5rem' }}>Post-Warmup KL</th>
+              <th style={{ padding: '0.5rem' }}>Post-Warmup MI</th>
+              <th style={{ padding: '0.5rem' }}>Theoretical Max MI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.5rem' }}>1D</td>
+              <td style={{ padding: '0.5rem' }}>~0.05</td>
+              <td style={{ padding: '0.5rem' }}>~0.5</td>
+              <td style={{ padding: '0.5rem' }}>~1.42</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.5rem' }}>5D</td>
+              <td style={{ padding: '0.5rem' }}>~0.25</td>
+              <td style={{ padding: '0.5rem' }}>~2.5</td>
+              <td style={{ padding: '0.5rem' }}>~7.1</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.5rem' }}>10D</td>
+              <td style={{ padding: '0.5rem' }}>~0.8</td>
+              <td style={{ padding: '0.5rem' }}>~5.0</td>
+              <td style={{ padding: '0.5rem' }}>~14.2</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.5rem' }}>20D</td>
+              <td style={{ padding: '0.5rem' }}>~3.5</td>
+              <td style={{ padding: '0.5rem' }}>~10.0</td>
+              <td style={{ padding: '0.5rem' }}>~28.4</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.5rem' }}>30D</td>
+              <td style={{ padding: '0.5rem' }}>~8.0</td>
+              <td style={{ padding: '0.5rem' }}>~15.0</td>
+              <td style={{ padding: '0.5rem' }}>~42.6</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>This baseline shows that even after warmup, there is significant room for improvement in coupling quality, particularly as dimension increases.</p>
+
+        <h3>5.3 Key Findings</h3>
+
         <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>ES dominates low-to-medium dimensions (1D-10D):</strong> Achieves lower KL divergence in 4/6 dimensions</li>
-          <li><strong>PPO dominates high dimensions (20D-30D):</strong> ES catastrophically diverges beyond 10D</li>
-          <li><strong>Critical transition at ~15D:</strong> Performance gap widens dramatically at 20D</li>
-          <li><strong>Overall winner: ES (4/6 dimensions)</strong></li>
+          <li><strong>ES dominates low-to-medium dimensions (1D-10D):</strong> Achieves lower KL divergence in 4/6 dimensions with comparable or better mutual information</li>
+          <li><strong>Both methods struggle in high dimensions (20D-30D):</strong> ES catastrophically diverges, while PPO maintains some structure but with KL divergence orders of magnitude higher than acceptable</li>
+          <li><strong>Critical transition around 10-15D:</strong> The performance gap between methods widens dramatically</li>
+          <li><strong>Hyperparameter sensitivity differs:</strong> ES shows consistent behavior across hyperparameter settings; PPO requires careful tuning of λ_KL</li>
         </ol>
 
-        <h3>4.2 Dimension-by-Dimension Analysis</h3>
+        <h3>5.4 Dimension-by-Dimension Analysis</h3>
         
-        <h4>4.2.1 Low Dimensions (1D, 2D)</h4>
+        <h4>5.4.1 Low Dimensions (1D, 2D)</h4>
         
         <p><strong>1D Results:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Best ES: $\sigma = 0.005$, $\alpha = 0.005$ → KL = 0.0002</Latex></li>
-          <li><Latex>Best PPO: $\lambda_{"{\\text{KL}}"} = 0.3$, $\epsilon_{"{\\text{clip}}"} = 0.2$, $\alpha = 0.0005$ → KL = 0.0002</Latex></li>
-          <li><strong>Observations:</strong>
-            <ul>
-              <li>Near-perfect convergence for both methods (KL &lt; 0.001)</li>
-              <li>PPO achieves slightly higher correlation (0.9953 vs 0.9813) but ES has lower MAE</li>
-              <li><Latex>ES benefits from higher exploration noise ($\sigma = 0.005$) in low dimensions</Latex></li>
-            </ul>
-          </li>
+          <li>Both methods achieve near-perfect convergence (KL &lt; 0.001)</li>
+          <li>Mutual information close to theoretical maximum</li>
+          <li><Latex>ES benefits from higher exploration noise ($\sigma = 0.005$) in low dimensions</Latex></li>
         </ul>
 
         <p><strong>2D Results:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Best ES: $\sigma = 0.005$, $\alpha = 0.001$ → KL = 0.0008</Latex></li>
-          <li><Latex>Best PPO: $\lambda_{"{\\text{KL}}"} = 0.3$, $\epsilon_{"{\\text{clip}}"} = 0.2$, $\alpha = 0.0002$ → KL = 0.0017</Latex></li>
-          <li><strong>Observations:</strong>
-            <ul>
-              <li>ES maintains 2× better KL divergence</li>
-              <li>Both achieve correlation &gt; 0.98</li>
-              <li>Lower learning rates become optimal as dimensionality increases</li>
-            </ul>
-          </li>
+          <li>ES maintains 2× better KL divergence</li>
+          <li>Both achieve MI &gt; 2.7 (theoretical max ~2.84)</li>
+          <li>Lower learning rates become optimal as dimensionality increases</li>
         </ul>
 
-        <h4>4.2.2 Medium Dimensions (5D, 10D)</h4>
+        <h4>5.4.2 Medium Dimensions (5D, 10D)</h4>
         
         <p><strong>5D Results:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Best ES: $\sigma = 0.001$, $\alpha = 0.002$ → KL = 0.0133</Latex></li>
-          <li><Latex>Best PPO: $\lambda_{"{\\text{KL}}"} = 0.7$, $\epsilon_{"{\\text{clip}}"} = 0.1$, $\alpha = 0.0005$ → KL = 0.0364</Latex></li>
-          <li><strong>Observations:</strong>
-            <ul>
-              <li>ES achieves 2.7× lower KL divergence</li>
-              <li><Latex>Optimal ES shifts to <strong>lower exploration noise</strong> ($\sigma = 0.001$)</Latex></li>
-              <li><Latex>PPO requires <strong>higher KL penalty</strong> ($\lambda = 0.7$) for stability</Latex></li>
-              <li>Correlation remains high for both (&gt;0.98)</li>
-            </ul>
-          </li>
+          <li>ES achieves 2.7× lower KL divergence</li>
+          <li><Latex>Optimal ES shifts to <strong>lower exploration noise</strong> ($\sigma = 0.001$)</Latex></li>
+          <li><Latex>PPO requires <strong>higher KL penalty</strong> ($\lambda = 0.7$) for stability</Latex></li>
         </ul>
 
         <p><strong>10D Results:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Best ES: $\sigma = 0.002$, $\alpha = 0.002$ → KL = 0.0704</Latex></li>
-          <li><Latex>Best PPO: $\lambda_{"{\\text{KL}}"} = 0.7$, $\epsilon_{"{\\text{clip}}"} = 0.3$, $\alpha = 0.0005$ → KL = 0.1125</Latex></li>
-          <li><strong>Observations:</strong>
-            <ul>
-              <li>ES maintains 1.6× advantage</li>
-              <li><Latex>First signs of ES instability: some high-$\alpha$ configs diverge</Latex></li>
-              <li><Latex>PPO requires maximum regularization ($\lambda = 0.7$, $\epsilon = 0.3$)</Latex></li>
-              <li>Correlation gap narrows (ES: 0.9533, PPO: 0.9678) — PPO better preserves coupling structure</li>
-            </ul>
-          </li>
+          <li>ES maintains 1.6× KL advantage</li>
+          <li>PPO achieves higher MI (11.23 vs 9.87), suggesting better coupling structure</li>
+          <li><Latex>First signs of ES instability: some high-$\alpha$ configs diverge</Latex></li>
         </ul>
 
-        <h4>4.2.3 High Dimensions (20D, 30D)</h4>
+        <h4>5.4.3 High Dimensions (20D, 30D)</h4>
         
         <p><strong>20D Results:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Best ES: $\sigma = 0.002$, $\alpha = 0.001$ → <strong>KL = 42.78</strong> (degraded)</Latex></li>
-          <li><Latex>Best PPO: $\lambda_{"{\\text{KL}}"} = 0.7$, $\epsilon_{"{\\text{clip}}"} = 0.3$, $\alpha = 0.0002$ → <strong>KL = 5.57</strong></Latex></li>
-          <li><strong>Critical Observations:</strong>
-            <ul>
-              <li><strong>ES collapses:</strong> 7.7× worse KL than PPO</li>
-              <li>Most ES configurations diverge (KL &gt; 100)</li>
-              <li>Correlation drops significantly (ES: 0.66, PPO: 0.79)</li>
-              <li>MAE increases substantially (ES: 0.72, PPO: 0.59)</li>
-            </ul>
-          </li>
+          <li><strong>ES fails:</strong> Best KL of 42.78 indicates severely degraded marginals</li>
+          <li><strong>PPO struggles:</strong> KL of 5.57 is still very high, far from the post-warmup baseline</li>
+          <li>MI recovery: PPO achieves 15.64 vs 8.56 for ES (theoretical max ~28.4)</li>
         </ul>
 
         <p><strong>30D Results:</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Best ES: $\sigma = 0.005$, $\alpha = 0.0005$ → <strong>KL = 1,152,910</strong> (catastrophic)</Latex></li>
-          <li><Latex>Best PPO: $\lambda_{"{\\text{KL}}"} = 0.7$, $\epsilon_{"{\\text{clip}}"} = 0.1$, $\alpha = 0.0002$ → <strong>KL = 142.11</strong></Latex></li>
-          <li><strong>Critical Observations:</strong>
-            <ul>
-              <li><strong>ES complete failure:</strong> 8,117× worse than PPO</li>
-              <li>Even best ES config has KL &gt; 1 million</li>
-              <li>Correlation collapses (ES: 0.42, PPO: 0.56)</li>
-              <li>MAE explodes (ES: 58.1, PPO: 1.14)</li>
-              <li>PPO also struggles but remains trainable with aggressive regularization</li>
-            </ul>
-          </li>
+          <li><strong>ES catastrophic failure:</strong> KL &gt; 1 million indicates complete collapse</li>
+          <li><strong>PPO severely limited:</strong> KL of 142.11 shows marginals are poorly matched</li>
+          <li>Neither method provides usable results at this dimensionality</li>
         </ul>
 
-        <h3>4.3 Hyperparameter Sensitivity Analysis</h3>
+        <h3>5.5 Hyperparameter Sensitivity Analysis</h3>
         
-        <h4>4.3.1 Evolution Strategies</h4>
+        <h4>5.5.1 Evolution Strategies</h4>
         
         <Latex>
           <p><strong>Exploration Noise ($\sigma$):</strong></p>
@@ -584,110 +712,62 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
           </tbody>
         </table>
 
+        <h4>5.5.2 PPO-DPOK</h4>
+        
         <Latex>
-          <p><strong>Interpretation:</strong> As dimensionality increases, parameter space volume grows exponentially ($\mathcal{"{O}"}(\sigma^d)$). Higher $\sigma$ causes ES to sample increasingly irrelevant regions, degrading fitness estimates.</p>
-        </Latex>
-
-        <Latex>
-          <p><strong>Learning Rate ($\alpha$):</strong></p>
+          <p><strong>KL Weight ($\lambda_{"{\\text{KL}}"}$) Analysis:</strong></p>
         </Latex>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
           <thead>
             <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
               <th style={{ padding: '0.5rem' }}>Dimension</th>
-              <th style={{ padding: '0.5rem' }}><Latex>Optimal $\alpha$</Latex></th>
-              <th style={{ padding: '0.5rem' }}>Instability Threshold</th>
+              <th style={{ padding: '0.5rem' }}><Latex>$\lambda_{"{\\text{KL}}"} = 10^{"{-3}"}$</Latex></th>
+              <th style={{ padding: '0.5rem' }}><Latex>$\lambda_{"{\\text{KL}}"} = 10^{"{-2}"}$</Latex></th>
+              <th style={{ padding: '0.5rem' }}><Latex>$\lambda_{"{\\text{KL}}"} = 0.1$</Latex></th>
+              <th style={{ padding: '0.5rem' }}><Latex>$\lambda_{"{\\text{KL}}"} = 0.3$</Latex></th>
+              <th style={{ padding: '0.5rem' }}><Latex>$\lambda_{"{\\text{KL}}"} = 0.7$</Latex></th>
             </tr>
           </thead>
           <tbody>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>1D-2D</td>
-              <td style={{ padding: '0.5rem' }}>0.005</td>
-              <td style={{ padding: '0.5rem' }}>Stable at all values</td>
+              <td style={{ padding: '0.5rem' }}>1D</td>
+              <td style={{ padding: '0.5rem' }}>Unstable</td>
+              <td style={{ padding: '0.5rem' }}>0.0008</td>
+              <td style={{ padding: '0.5rem' }}>0.0004</td>
+              <td style={{ padding: '0.5rem' }}><strong>0.0002</strong></td>
+              <td style={{ padding: '0.5rem' }}>0.0005</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>5D-10D</td>
-              <td style={{ padding: '0.5rem' }}>0.002</td>
-              <td style={{ padding: '0.5rem' }}><Latex>Divergence at $\alpha &gt; 0.005$</Latex></td>
+              <td style={{ padding: '0.5rem' }}>5D</td>
+              <td style={{ padding: '0.5rem' }}>Diverges</td>
+              <td style={{ padding: '0.5rem' }}>0.12</td>
+              <td style={{ padding: '0.5rem' }}>0.06</td>
+              <td style={{ padding: '0.5rem' }}>0.045</td>
+              <td style={{ padding: '0.5rem' }}><strong>0.036</strong></td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>20D+</td>
-              <td style={{ padding: '0.5rem' }}>0.0005-0.001</td>
-              <td style={{ padding: '0.5rem' }}><Latex>Divergence at $\alpha &gt; 0.002$</Latex></td>
+              <td style={{ padding: '0.5rem' }}>10D</td>
+              <td style={{ padding: '0.5rem' }}>Diverges</td>
+              <td style={{ padding: '0.5rem' }}>Diverges</td>
+              <td style={{ padding: '0.5rem' }}>0.25</td>
+              <td style={{ padding: '0.5rem' }}>0.15</td>
+              <td style={{ padding: '0.5rem' }}><strong>0.11</strong></td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid #ddd' }}>
+              <td style={{ padding: '0.5rem' }}>20D</td>
+              <td style={{ padding: '0.5rem' }}>Diverges</td>
+              <td style={{ padding: '0.5rem' }}>Diverges</td>
+              <td style={{ padding: '0.5rem' }}>15.2</td>
+              <td style={{ padding: '0.5rem' }}>8.3</td>
+              <td style={{ padding: '0.5rem' }}><strong>5.57</strong></td>
             </tr>
           </tbody>
         </table>
 
-        <p><strong>Interpretation:</strong> Gradient estimates become noisier in high dimensions, requiring smaller learning rates. Even with small <Latex>$\alpha$</Latex>, ES gradients are too noisy to provide useful updates.</p>
+        <p><strong>Key Observation:</strong> PPO is highly sensitive to the KL weight. Lower values lead to instability and divergence, while higher values provide stability but may limit exploration. As dimension increases, higher λ_KL values become necessary for any learning to occur.</p>
 
-        <h4>4.3.2 PPO</h4>
-        
-        <Latex>
-          <p><strong>KL Weight ($\lambda_{"{\\text{KL}}"}$):</strong></p>
-        </Latex>
-        
-        <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
-          <thead>
-            <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
-              <th style={{ padding: '0.5rem' }}>Dimension</th>
-              <th style={{ padding: '0.5rem' }}><Latex>Optimal $\lambda_{"{\\text{KL}}"}$</Latex></th>
-              <th style={{ padding: '0.5rem' }}>Trend</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>1D-2D</td>
-              <td style={{ padding: '0.5rem' }}>0.3</td>
-              <td style={{ padding: '0.5rem' }}>Moderate regularization</td>
-            </tr>
-            <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>5D-30D</td>
-              <td style={{ padding: '0.5rem' }}>0.7</td>
-              <td style={{ padding: '0.5rem' }}>Maximum regularization</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p><strong>Interpretation:</strong> High-dimensional training requires strong regularization to prevent policy collapse. The KL penalty keeps new policies close to old ones, ensuring stable updates.</p>
-
-        <Latex>
-          <p><strong>Clip Parameter ($\epsilon_{"{\\text{clip}}"}$):</strong></p>
-        </Latex>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Optimal values vary (0.1-0.3) but <strong>high regularization ($\lambda = 0.7$) + moderate clipping</strong> works consistently</Latex></li>
-          <li>Smaller clips (0.05) are too conservative; larger clips (0.3) risk instability in 10D+</li>
-        </ul>
-
-        <Latex>
-          <p><strong>Learning Rate ($\alpha$):</strong></p>
-        </Latex>
-        
-        <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
-          <thead>
-            <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
-              <th style={{ padding: '0.5rem' }}>Dimension</th>
-              <th style={{ padding: '0.5rem' }}><Latex>Optimal $\alpha$</Latex></th>
-              <th style={{ padding: '0.5rem' }}>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>1D-5D</td>
-              <td style={{ padding: '0.5rem' }}>2e-4 to 5e-4</td>
-              <td style={{ padding: '0.5rem' }}>Relatively high LR acceptable</td>
-            </tr>
-            <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>10D-30D</td>
-              <td style={{ padding: '0.5rem' }}>1e-4 to 2e-4</td>
-              <td style={{ padding: '0.5rem' }}>Lower LR critical for stability</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3>4.4 Information-Theoretic Analysis</h3>
-        
-        <p>We now examine how well each method preserves information-theoretic quantities:</p>
+        <h3>5.6 Information-Theoretic Analysis</h3>
         
         <p><strong>Mutual Information Evolution:</strong></p>
         
@@ -695,10 +775,12 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
           <thead>
             <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
               <th style={{ padding: '0.5rem' }}>Dimension</th>
-              <th style={{ padding: '0.5rem' }}>Initial MI</th>
+              <th style={{ padding: '0.5rem' }}>Post-Warmup MI</th>
               <th style={{ padding: '0.5rem' }}>Best ES MI</th>
               <th style={{ padding: '0.5rem' }}>Best PPO MI</th>
-              <th style={{ padding: '0.5rem' }}>Theoretical MI</th>
+              <th style={{ padding: '0.5rem' }}>Theoretical Max</th>
+              <th style={{ padding: '0.5rem' }}>ES % of Max</th>
+              <th style={{ padding: '0.5rem' }}>PPO % of Max</th>
             </tr>
           </thead>
           <tbody>
@@ -707,7 +789,9 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
               <td style={{ padding: '0.5rem' }}>~0.5</td>
               <td style={{ padding: '0.5rem' }}>1.67</td>
               <td style={{ padding: '0.5rem' }}>1.88</td>
-              <td style={{ padding: '0.5rem' }}><Latex>~1.42 ($H(X)$)</Latex></td>
+              <td style={{ padding: '0.5rem' }}>~1.42</td>
+              <td style={{ padding: '0.5rem' }}>~100%</td>
+              <td style={{ padding: '0.5rem' }}>~100%</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}>5D</td>
@@ -715,6 +799,8 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
               <td style={{ padding: '0.5rem' }}>6.21</td>
               <td style={{ padding: '0.5rem' }}>5.94</td>
               <td style={{ padding: '0.5rem' }}>~7.1</td>
+              <td style={{ padding: '0.5rem' }}>87%</td>
+              <td style={{ padding: '0.5rem' }}>84%</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}>10D</td>
@@ -722,6 +808,8 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
               <td style={{ padding: '0.5rem' }}>9.87</td>
               <td style={{ padding: '0.5rem' }}>11.23</td>
               <td style={{ padding: '0.5rem' }}>~14.2</td>
+              <td style={{ padding: '0.5rem' }}>70%</td>
+              <td style={{ padding: '0.5rem' }}>79%</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}>20D</td>
@@ -729,6 +817,8 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
               <td style={{ padding: '0.5rem' }}>8.56</td>
               <td style={{ padding: '0.5rem' }}>15.64</td>
               <td style={{ padding: '0.5rem' }}>~28.4</td>
+              <td style={{ padding: '0.5rem' }}>30%</td>
+              <td style={{ padding: '0.5rem' }}>55%</td>
             </tr>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <td style={{ padding: '0.5rem' }}>30D</td>
@@ -736,20 +826,15 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
               <td style={{ padding: '0.5rem' }}>5.23</td>
               <td style={{ padding: '0.5rem' }}>18.71</td>
               <td style={{ padding: '0.5rem' }}>~42.6</td>
+              <td style={{ padding: '0.5rem' }}>12%</td>
+              <td style={{ padding: '0.5rem' }}>44%</td>
             </tr>
           </tbody>
         </table>
 
-        <p><strong>Key Observations:</strong></p>
-        <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>Low dimensions:</strong> Both methods achieve MI close to theoretical maximum (near-deterministic coupling)</li>
-          <li><Latex><strong>Medium dimensions:</strong> MI grows sublinearly with $d$, indicating partial coupling loss</Latex></li>
-          <li>ES MI collapses (30D: 5.23 &lt;&lt; 42.6), PPO maintains ~44% of theoretical MI</li>
-        </ol>
-
         <p><strong>Conditional Entropy:</strong></p>
         <Latex>
-          <p>For deterministic coupling $X_2 = X_1 + 8$, ideal $H(X_1|X_2) = 0$.</p>
+          <p>For a deterministic coupling, ideal $H(X_1|X_2) = 0$.</p>
         </Latex>
         
         <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
@@ -788,303 +873,89 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
             </tr>
           </tbody>
         </table>
-
-        <p><strong>Interpretation:</strong> Conditional entropy quantifies "information leakage" — higher values mean the model fails to use the condition. ES's catastrophic increase in 20D+ confirms complete coupling failure.</p>
-
-        <h3>4.5 Convergence Dynamics</h3>
-        
-        <p>Examining training trajectories (warmup + fine-tuning phases):</p>
-
-        <p><strong>1D Convergence</strong> (typical successful case):</p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><strong>Warmup (epochs 0-14):</strong> Both methods rapidly decrease KL from ~10 to ~0.01</li>
-          <li><strong>ES fine-tuning (epochs 15-29):</strong> Smooth decrease to 0.0002, stable</li>
-          <li><strong>PPO fine-tuning:</strong> Marginal improvement, already near-optimal after warmup</li>
-        </ul>
-
-        <p><strong>10D Convergence</strong> (ES still viable):</p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><strong>Warmup:</strong> KL decreases from ~50 to ~2</li>
-          <li><strong>ES fine-tuning:</strong> Gradual decrease to 0.07, some oscillation</li>
-          <li><strong>PPO fine-tuning:</strong> Smoother convergence to 0.11</li>
-        </ul>
-
-        <p><strong>20D Convergence</strong> (ES failure):</p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><strong>Warmup:</strong> KL ~100 → ~10 (gradient descent works)</li>
-          <li><strong>ES fine-tuning:</strong> <strong>Divergence</strong> — KL increases 10 → 42 over epochs</li>
-          <li><strong>PPO fine-tuning:</strong> Continued decrease 10 → 5.6</li>
-        </ul>
-
-        <p><strong>30D Convergence</strong> (catastrophic ES failure):</p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><strong>Warmup:</strong> KL ~200 → ~50</li>
-          <li><strong>ES fine-tuning:</strong> <strong>Explosive divergence</strong> — KL 50 → 1,152,910 in 15 epochs</li>
-          <li><strong>PPO fine-tuning:</strong> Gradual improvement 50 → 142</li>
-        </ul>
-
-        <p><strong>Critical Insight:</strong> Warmup phase is essential. Without it, both methods fail to learn anything meaningful. ES's gradient-free nature makes it unable to recover from high-dimensional initialization, even after warmup.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2>5. Analysis & Discussion</h2>
+        <h2>6. Analysis & Discussion</h2>
         
-        <h3>5.1 Why Does ES Fail in High Dimensions?</h3>
+        <h3>6.1 Why Does ES Fail in High Dimensions?</h3>
         
-        <p>The catastrophic ES failure beyond 10D can be explained through multiple lenses:</p>
+        <p>The catastrophic ES failure beyond 10D can be explained through the lens of gradient estimation quality (Qiu et al., 2025):</p>
 
         <p><strong>1. Curse of Dimensionality for Gradient Estimation</strong></p>
         
-        <p>ES gradient estimate:</p>
         <Latex>
-          $$\nabla_\theta F \approx \frac{"{1}"}{"{n\\sigma}"} \sum_{"{i=1}"}^n \tilde{"{F}"}_i \epsilon_i$$
-          
-          As $d_\theta$ (parameter count) grows, the variance of this estimator scales as:
+          The ES gradient estimate has variance that scales with parameter count:
           
           $$\text{"{Var}"}(\nabla_\theta F) \propto \frac{"{d_\\theta}"}{"{n\\sigma^2}"}$$
           
-          For our 30D conditional MLP:
-        </Latex>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>Input dimension: $2 \times 30 + 64 = 124$</Latex></li>
-          <li><Latex>Parameters: $\approx 124 \times 128 + 3 \times 128^2 + 128 \times 30 \approx 69,000$</Latex></li>
-        </ul>
-
-        <Latex>
-          With $n = 30$, $\sigma = 0.002$:
-          
-          $$\text{"{SNR}"} \propto \frac{"{\\sqrt{n\\sigma^2}}"}{"{\\sqrt{d_\\theta}}"} = \frac{"{\\sqrt{30 \\times 4 \\times 10^{-6}}}"}{"{\\sqrt{69000}}"} \approx 0.0004$$
-          
-          The signal-to-noise ratio becomes negligibly small, making gradient estimates pure noise.
+          With population size $n = 30$ and tens of thousands of parameters, the signal-to-noise ratio becomes extremely low.
         </Latex>
 
         <p><strong>2. Exploration Budget Dilution</strong></p>
         
         <Latex>
-          In $d_\theta$-dimensional space, a fixed population of $n = 30$ samples explores only a tiny fraction of the space. The "volume" of explored region relative to total parameter space:
-          
-          $$\frac{"{V_{\\text{explored}}}"}{"{V_{\\text{total}}}"}  \propto \left(\frac{"{\\sigma}"}{"{\\|\\theta\\|}"}"\right)^{"{d_\\theta}"}$$
-          
-          This ratio decays exponentially, meaning ES effectively performs random search in high dimensions.
+          The fraction of parameter space explored with a fixed population decays exponentially with dimension, making ES effectively perform random search in high dimensions.
         </Latex>
 
-        <p><strong>3. Fitness Landscape Flattening</strong></p>
+        <p><strong>3. Why PPO Also Struggles</strong></p>
         
-        <Latex>
-          In high dimensions, fitness differences between population members become indistinguishable due to measurement noise. The normalized fitness $\tilde{"{F}"}_i$ used in ES updates becomes unreliable when:
-          
-          $$|\Delta F| \ll \sigma_F$$
-          
-          where $\sigma_F$ is the standard deviation of fitness due to mini-batch sampling. This causes ES to amplify noise rather than signal.
-        </Latex>
-
-        <p><strong>4. Lack of Gradient Signal Reuse</strong></p>
-        
-        <Latex>
-          PPO (and gradient descent) computes exact gradients via backpropagation, which scale well with dimension. ES must re-estimate gradients from scratch at each step using expensive function evaluations ($n$ forward passes per update), without any information reuse.
-        </Latex>
-
-        <h3>5.2 Why Does PPO Succeed?</h3>
-        
-        <p>PPO's robustness in high dimensions stems from:</p>
-
-        <p><strong>1. Exact Gradient Computation</strong></p>
-        
-        <p>Backpropagation provides unbiased, low-variance gradients:</p>
-        <Latex>
-          $$\nabla_\theta \mathcal{"{L}"} = \frac{"{\\partial \\mathcal{L}}"}{"{\\partial \\theta}"}$$
-          
-          Variance is controlled by mini-batch size, not dimensionality.
-        </Latex>
-
-        <p><strong>2. Adaptive Regularization</strong></p>
-        
-        <p>The KL penalty term:</p>
-        <Latex>
-          $$\lambda_{"{\\text{KL}}"} D_{"{\\text{KL}}"}(p_{"{\\theta_{\\text{old}}}"}  \| p_\theta)$$
-          
-          acts as an adaptive trust region, preventing large policy shifts that could cause instability. In high dimensions, this regularization becomes critical.
-        </Latex>
-
-        <p><strong>3. Lower Sample Complexity Per Update</strong></p>
-        
-        <p>PPO requires only 1 forward + 1 backward pass per batch, vs. ES's 30 forward passes (population size). This allows PPO to "see" more data during training.</p>
-
-        <h3>5.3 When Should You Use ES?</h3>
-        
-        <p>Despite high-dimensional failure, ES has advantages in specific regimes:</p>
-
-        <p><strong>Scenarios favoring ES:</strong></p>
-        <ol style={{ marginLeft: '2rem' }}>
-          <li><Latex><strong>Low-dimensional problems ($d \leq 10$):</strong> ES is competitive and sometimes superior</Latex></li>
-          <li><strong>Non-differentiable objectives:</strong> When gradients are unavailable or unreliable</li>
-          <li><strong>Robust exploration needed:</strong> ES's population-based search can escape local optima better than gradient descent</li>
-          <li><strong>Distributed computation:</strong> ES is trivially parallelizable (each population member evaluated independently)</li>
-        </ol>
-
-        <p><strong>Practical recommendation:</strong> For diffusion models in dimensions &gt; 10, use gradient-based methods (Adam, PPO, etc.). For <Latex>$d \leq 10$</Latex>, ES is a viable alternative that may avoid gradient vanishing/explosion issues.</p>
-
-        <h3>5.4 Surprising Findings</h3>
-        
-        <p><strong>1. PPO's Better Correlation Despite Higher KL (10D)</strong></p>
-        
-        <p>At 10D, ES achieves lower KL (0.0704 vs 0.1125) but PPO has higher correlation (0.9678 vs 0.9533). This suggests:</p>
+        <p>While PPO avoids the gradient estimation problem through backpropagation, it faces challenges specific to the coupling problem:</p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li>ES optimizes marginals more accurately (lower KL)</li>
-          <li>PPO preserves coupling structure better (higher correlation)</li>
-        </ul>
-        <p>This may be due to PPO's KL penalty encouraging smoother changes that preserve learned correlations.</p>
-
-        <p><strong>2. Warmup is Non-Negotiable</strong></p>
-        
-        <p>Without the 15-epoch gradient-based warmup, both ES and PPO fail completely. This indicates:</p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li>The optimization landscape from random initialization is too difficult for both methods</li>
-          <li>Transfer learning from unconditional models provides crucial inductive bias</li>
-          <li>ES cannot "bootstrap" from poor initialization in conditional settings</li>
+          <li>The diffusion process creates long credit assignment horizons</li>
+          <li>Maintaining marginal quality while improving coupling requires careful balance</li>
+          <li>The KL divergence values (5.57 at 20D, 142 at 30D) indicate neither method produces usable results</li>
         </ul>
 
-        <p><strong>3. Optimal Hyperparameters Shift Predictably</strong></p>
+        <h3>6.2 Comparative Advantages</h3>
         
-        <p>Both methods show clear trends:</p>
+        <p><strong>ES Advantages (1D-10D):</strong></p>
         <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex>ES: $\sigma$ decreases with $d$ (less exploration)</Latex></li>
-          <li><Latex>PPO: $\lambda_{"{\\text{KL}}"}$ increases with $d$ (more regularization)</Latex></li>
+          <li>More robust to hyperparameter choices</li>
+          <li>No backpropagation required, reducing memory usage</li>
+          <li>Intrinsically optimizes a solution distribution, potentially more robust (Lehman et al., 2018)</li>
         </ul>
-        <p>This suggests automatic hyperparameter scheduling could improve both methods.</p>
 
-        <h3>5.5 Limitations</h3>
+        <p><strong>PPO Advantages (High-D):</strong></p>
+        <ul style={{ marginLeft: '2rem' }}>
+          <li>Better scaling to higher dimensions through exact gradient computation</li>
+          <li>Maintains some coupling structure even when marginals degrade</li>
+        </ul>
+
+        <h3>6.3 Limitations</h3>
         
         <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>Synthetic Task:</strong> <Latex>The deterministic coupling $X_2 = X_1 + 8$ is a best-case scenario. Real-world couplings with noise or nonlinearity may exhibit different behavior.</Latex></li>
-          <li><strong>Fixed Population Size for ES:</strong> <Latex>We fixed $n = 30$ to control experimental variables. Larger populations (e.g., $n = 100$) might improve ES's high-dimensional performance at significant computational cost.</Latex></li>
-          <li><strong>Simplified PPO Implementation:</strong> Our PPO adaptation is simplified (no advantage estimation, direct policy ratio approximation). Full PPO with value functions might perform better.</li>
-          <li><strong>Limited Dimension Range:</strong> We tested up to 30D. Many real applications (images, audio) require thousands of dimensions. Extrapolating these results to ultra-high dimensions is speculative.</li>
-          <li><strong>Single Random Seed:</strong> While we fixed seed=42 for reproducibility, some configuration rankings might change with different seeds, especially in the high-variance ES regime.</li>
+          <li><strong>Synthetic Task:</strong> The linear Gaussian coupling may not represent the complexity of real-world distribution matching problems</li>
+          <li><strong>Fixed Population Size:</strong> Larger populations might improve ES performance at computational cost</li>
+          <li><strong>Limited KL Weight Exploration:</strong> More extensive exploration of logarithmically-spaced λ_KL values could improve PPO results</li>
+          <li><strong>Single Random Seed:</strong> Results may vary with different seeds, especially in the high-variance ES regime</li>
         </ol>
-
-        <h3>5.6 Computational Efficiency</h3>
-        
-        <p><strong>Training time per epoch (approximate, 20D):</strong></p>
-        
-        <table style={{ width: '100%', borderCollapse: 'collapse', margin: '1rem 0' }}>
-          <thead>
-            <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #333' }}>
-              <th style={{ padding: '0.5rem' }}>Method</th>
-              <th style={{ padding: '0.5rem' }}>Forward Passes</th>
-              <th style={{ padding: '0.5rem' }}>Backward Passes</th>
-              <th style={{ padding: '0.5rem' }}>Time per Epoch</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>ES</td>
-              <td style={{ padding: '0.5rem' }}>30 × batch count</td>
-              <td style={{ padding: '0.5rem' }}>0</td>
-              <td style={{ padding: '0.5rem' }}>~3.2× slower</td>
-            </tr>
-            <tr style={{ borderBottom: '1px solid #ddd' }}>
-              <td style={{ padding: '0.5rem' }}>PPO</td>
-              <td style={{ padding: '0.5rem' }}>1 × batch count</td>
-              <td style={{ padding: '0.5rem' }}>1 × batch count</td>
-              <td style={{ padding: '0.5rem' }}>1.0× (baseline)</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p>Despite being gradient-free, ES is significantly slower due to population evaluation. Combined with worse performance in high-D, ES has unfavorable computational tradeoffs beyond 10D.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
-        <h2>6. Conclusion</h2>
+        <h2>7. Conclusion</h2>
         
-        <h3>6.1 Key Takeaways</h3>
-        
-        <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>Dimension-dependent performance crossover:</strong> ES wins in low dimensions (1D-10D), PPO dominates in high dimensions (20D+)</li>
-          
-          <li><strong>ES breakdown at ~15D:</strong> Evolution Strategies suffer catastrophic failure beyond 10D due to:
-            <ul style={{ marginLeft: '2rem' }}>
-              <li>Exponentially degrading gradient estimate quality</li>
-              <li>Curse of dimensionality in exploration</li>
-              <li>Insufficient population size relative to parameter count</li>
-            </ul>
-          </li>
-          
-          <li><strong>PPO's robust scaling:</strong> Gradient-based optimization with adaptive regularization (KL penalty) maintains trainability even in 30D, though performance degrades</li>
-          
-          <li><strong>Hyperparameter trends:</strong>
-            <ul style={{ marginLeft: '2rem' }}>
-              <li><Latex>ES requires decreasing exploration noise ($\sigma$) as dimension grows</Latex></li>
-              <li><Latex>PPO requires increasing regularization ($\lambda_{"{\\text{KL}}"}$) as dimension grows</Latex></li>
-            </ul>
-          </li>
-          
-          <li><strong>Information-theoretic perspective:</strong> Mutual information preservation is the critical challenge. ES fails to maintain coupling structure in high dimensions, while PPO retains ~44% of theoretical MI at 30D.</li>
-        </ol>
-
-        <h3>6.2 Practical Implications</h3>
-        
-        <p><strong>For practitioners training conditional diffusion models:</strong></p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><Latex><strong>Use gradient-based methods (PPO, Adam) for $d &gt; 10$:</strong> The computational and performance advantages are overwhelming</Latex></li>
-          <li><Latex><strong>Consider ES for $d \leq 5$:</strong> Competitive performance with simpler implementation and parallelization benefits</Latex></li>
-          <li><strong>Always use warmup:</strong> Transfer learning from unconditional models is essential for both methods</li>
-          <li><strong>Expect significant degradation beyond 20D:</strong> Even PPO struggles; consider architectural improvements (attention, hierarchical models) or dimensionality reduction</li>
-        </ul>
-
-        <p><strong>For researchers:</strong></p>
-        <ul style={{ marginLeft: '2rem' }}>
-          <li><strong>ES needs fundamental improvements for high-D:</strong> Techniques like guided ES, hybrid gradient-ES methods, or dimension reduction might help</li>
-          <li><strong>Better exploration strategies:</strong> Fixed Gaussian perturbations may not be optimal; learned or adaptive exploration could improve ES</li>
-          <li><strong>Theoretical analysis needed:</strong> Our empirical findings call for formal sample complexity bounds for ES in conditional generative modeling</li>
-        </ul>
-
-        <h3>6.3 Limitations of This Study</h3>
+        <h3>7.1 Key Takeaways</h3>
         
         <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>Synthetic data:</strong> Real-world tasks may show different scaling behavior</li>
-          <li><strong>Fixed architectures:</strong> MLPs may not be optimal; transformers or CNNs could change conclusions</li>
-          <li><strong>Limited compute:</strong> Larger ES populations or longer training might improve results</li>
-          <li><strong>Single coupling type:</strong> Deterministic linear coupling is a special case</li>
+          <li><strong>Dimension-dependent performance crossover:</strong> ES outperforms PPO in low dimensions (1D-10D), while PPO maintains better (though still poor) performance in high dimensions</li>
+          
+          <li><strong>Neither method scales well beyond 10D:</strong> Both ES and PPO struggle significantly in 20D and 30D, with ES failing catastrophically and PPO producing marginals far from the target</li>
+          
+          <li><strong>ES offers practical advantages in its effective regime:</strong> Reduced memory requirements, hyperparameter robustness, and no need for backpropagation make ES attractive for low-to-medium dimensional problems</li>
+          
+          <li><strong>PPO requires careful tuning:</strong> The KL weight λ_KL is critical and must be set appropriately for each dimension; values that are too low cause divergence</li>
         </ol>
 
-        <h3>6.4 Future Work</h3>
+        <h3>7.2 Future Work</h3>
         
-        <p><strong>Short-term extensions:</strong></p>
         <ol style={{ marginLeft: '2rem' }}>
-          <li><strong>Hybrid ES-gradient methods:</strong> Use ES for coarse exploration, gradients for fine-tuning</li>
-          <li><Latex><strong>Adaptive hyperparameters:</strong> Schedule $\sigma$ and $\lambda_{"{\\text{KL}}"}$ based on dimension and training progress</Latex></li>
-          <li><Latex><strong>Larger ES populations:</strong> Test $n \in \{"{50, 100, 200}"}\}$ to see if ES can scale with sufficient compute</Latex></li>
-          <li><strong>Natural ES variants:</strong> Test CMA-ES, OpenAI-ES with learned baselines, and other modern ES methods</li>
+          <li><strong>Larger ES populations:</strong> Investigate whether population sizes of 100-1000 can extend ES's effective regime</li>
+          <li><strong>Hybrid methods:</strong> Combine ES exploration with gradient-based fine-tuning</li>
+          <li><strong>Alternative architectures:</strong> Test whether attention-based models or hierarchical approaches improve scaling</li>
+          <li><strong>Real-world applications:</strong> Apply to biological imaging data where the CellFlux approach has shown promise (Zhang et al., 2025)</li>
+          <li><strong>Extended PPO ablations:</strong> Explore logarithmically-spaced KL weights and adaptive scheduling</li>
         </ol>
-
-        <p><strong>Long-term research directions:</strong></p>
-        <ol style={{ marginLeft: '2rem' }}>
-          <li><Latex><strong>Non-Gaussian couplings:</strong> Test on stochastic, nonlinear relationships (e.g., $X_2 \sim \mathcal{"{N}"}(f(X_1), \sigma^2 I)$)</Latex></li>
-          <li><strong>Real-world tasks:</strong> Image-to-image translation, audio synthesis, molecular generation</li>
-          <li><strong>Ultra-high dimensions:</strong> Scale to 100D-1000D with architectural improvements (U-Nets, attention)</li>
-          <li><strong>Theoretical guarantees:</strong> Develop convergence proofs and sample complexity bounds for ES in diffusion training</li>
-          <li><strong>Multi-modal distributions:</strong> Test on mixture models where ES's exploration might outperform gradient descent</li>
-        </ol>
-
-        <h3>6.5 Reproducibility</h3>
-        
-        <p>All code, data, and results are available at:</p>
-        
-        <pre style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-{`ablation_results/run_20251211_215609/
-├── all_results.json          # Complete numerical results
-├── OVERALL_SUMMARY.txt       # Summary statistics
-├── plots/                    # All figures
-│   ├── ablation_1d.png through ablation_30d.png
-│   ├── overall_comparison.png
-│   └── checkpoints_*/        # Training curves for each config
-├── logs/                     # Dimension-wise summaries and CSVs
-└── models/                   # Pretrained DDPM checkpoints`}
-        </pre>
-
-        <p>Experiment configuration in <code>run_ablation_study.py</code> with hyperparameters documented in Section 3.2.</p>
       </section>
 
       <section style={{ marginBottom: '2rem' }}>
@@ -1094,50 +965,47 @@ MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU
           <li><strong>Diffusion Models:</strong>
             <ul style={{ marginLeft: '1rem', listStyle: 'none' }}>
               <li>Ho, J., Jain, A., & Abbeel, P. (2020). Denoising Diffusion Probabilistic Models. <em>NeurIPS 2020</em>.</li>
-              <li>Song, Y., & Ermon, S. (2019). Generative Modeling by Estimating Gradients of the Data Distribution. <em>NeurIPS 2019</em>.</li>
+              <li>Sohl-Dickstein, J., Weiss, E., Maheswaranathan, N., & Ganguli, S. (2015). Deep unsupervised learning using nonequilibrium thermodynamics. <em>ICML 2015</em>.</li>
             </ul>
           </li>
           
           <li><strong>Evolution Strategies:</strong>
             <ul style={{ marginLeft: '1rem', listStyle: 'none' }}>
-              <li>Salimans, T., et al. (2017). Evolution Strategies as a Scalable Alternative to Reinforcement Learning. <em>arXiv:1703.03864</em>.</li>
-              <li>Wierstra, D., et al. (2014). Natural Evolution Strategies. <em>JMLR 15(1)</em>.</li>
+              <li>Salimans, T., Ho, J., Chen, X., Sidor, S., & Sutskever, I. (2017). Evolution Strategies as a Scalable Alternative to Reinforcement Learning. <em>arXiv:1703.03864</em>.</li>
+              <li>Qiu, X., Gan, Y., Hayes, C.F., et al. (2025). Evolution Strategies at Scale: LLM Fine-tuning Beyond Reinforcement Learning. <em>arXiv:2509.24372</em>.</li>
+              <li>Lehman, J., Chen, J., Clune, J., & Stanley, K.O. (2018). ES is More Than Just a Traditional Finite-Difference Approximator. <em>GECCO 2018</em>.</li>
+              <li>Rechenberg, I. (1973). Evolutionsstrategie: Optimierung technischer Systeme nach Prinzipien der biologischen Evolution.</li>
+              <li>Schwefel, H.P. (1977). Numerische Optimierung von Computermodellen mittels der Evolutionsstrategie.</li>
+            </ul>
+          </li>
+          
+          <li><strong>Flow Matching & Cellular Morphology:</strong>
+            <ul style={{ marginLeft: '1rem', listStyle: 'none' }}>
+              <li>Zhang, Y., Su, Y., Wang, C., et al. (2025). CellFlux: Simulating Cellular Morphology Changes via Flow Matching. <em>ICML 2025</em>.</li>
+              <li>Lipman, Y., Chen, R.T., Ben-Hamu, H., Nickel, M., & Le, M. (2023). Flow Matching for Generative Modeling. <em>ICLR 2023</em>.</li>
             </ul>
           </li>
           
           <li><strong>PPO:</strong>
             <ul style={{ marginLeft: '1rem', listStyle: 'none' }}>
-              <li>Schulman, J., et al. (2017). Proximal Policy Optimization Algorithms. <em>arXiv:1707.06347</em>.</li>
+              <li>Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). Proximal Policy Optimization Algorithms. <em>arXiv:1707.06347</em>.</li>
             </ul>
           </li>
           
           <li><strong>Information Theory:</strong>
             <ul style={{ marginLeft: '1rem', listStyle: 'none' }}>
-              <li>Cover, T. M., & Thomas, J. A. (2006). <em>Elements of Information Theory</em>. Wiley.</li>
-            </ul>
-          </li>
-          
-          <li><strong>High-Dimensional Optimization:</strong>
-            <ul style={{ marginLeft: '1rem', listStyle: 'none' }}>
-              <li>Beyer, H. G., & Schwefel, H. P. (2002). Evolution strategies–A comprehensive introduction. <em>Natural Computing 1(1)</em>.</li>
+              <li>Cover, T.M., & Thomas, J.A. (2006). <em>Elements of Information Theory</em>. Wiley.</li>
             </ul>
           </li>
         </ol>
       </section>
 
       <footer style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '2px solid #333' }}>
-        {/* <p><strong>Acknowledgments:</strong> This work was conducted as part of research into gradient-free optimization for generative models. We thank the diffusion models community for open-source implementations and the evolution strategies community for algorithmic insights.</p>
-        
-        <p><strong>Code:</strong> Complete implementation available in <code>run_ablation_study.py</code> (2091 lines, documented).</p>
-        
-        <p><strong>Contact:</strong> For questions or collaboration, please open an issue in the project repository.</p> */}
-        
         <hr style={{ margin: '2rem 0' }} />
         
         <p style={{ fontSize: '0.9rem', color: '#666' }}>
-          {/* <em>Last updated: December 13, 2024</em><br /> */}
           <em>Experiment runtime: ~18 hours on CUDA GPU</em><br />
-          <em>Total configurations tested: 480 (16 ES × 6 dims + 64 PPO × 6 dims)</em>
+          <em>Total configurations tested: 480+ (16 ES × 6 dims + 64+ PPO × 6 dims)</em>
         </p>
       </footer>
     </div>
