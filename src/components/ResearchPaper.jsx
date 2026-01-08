@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart } from 'recharts';
 import { Latex } from 'react-latex-next';
+import 'katex/dist/katex.min.css';
 
 // Pretraining metrics
 const pretrainingData = [
@@ -161,18 +162,18 @@ const ResearchPaper = () => {
 
           <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2.2 Theoretical Framework: Minimum Entropy Coupling (MEC)</h3>
           <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
-            To reconstruct this missing link, we adopt the principle of <strong style={{ color: colors.text }}>Minimum Entropy Coupling (MEC)</strong>. MEC postulates that among all possible joint distributions that satisfy the observed marginals, the biological reality is likely the one that minimizes the joint entropy <Latex>{`H(c,t)`}</Latex>.
+            To reconstruct this missing link, we adopt the principle of <strong style={{ color: colors.text }}>Minimum Entropy Coupling (MEC)</strong>. MEC postulates that among all possible joint distributions that satisfy the observed marginals, the biological reality is likely the one that minimizes the joint entropy $H(c,t)$.
           </p>
           <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
-            Minimizing the conditional entropy <Latex>{`H(t|c)`}</Latex> enforces a deterministic coupling, aligning with the biological intuition that a specific drug mechanism (Mode of Action) triggers a consistent, structured morphological change rather than a random stochastic one.
+            Minimizing the conditional entropy $H(t|c)$ enforces a deterministic coupling, aligning with the biological intuition that a specific drug mechanism (Mode of Action) triggers a consistent, structured morphological change rather than a random stochastic one.
           </p>
 
           <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2.3 Conditional Denoising Diffusion Probabilistic Models (DDPM)</h3>
           <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
-            While recent works like <strong style={{ color: colors.text }}>CellFlux</strong> (Zhang et al., 2025) explore Flow Matching for distribution alignment, we leverage the robust stability of <strong style={{ color: colors.text }}>Denoising Diffusion Probabilistic Models (DDPM)</strong>. We model the data distribution <Latex>{`p(x)`}</Latex> by learning to reverse a Markov diffusion process that gradually adds Gaussian noise to the image.
+            While recent works like <strong style={{ color: colors.text }}>CellFlux</strong> (Zhang et al., 2025) explore Flow Matching for distribution alignment, we leverage the robust stability of <strong style={{ color: colors.text }}>Denoising Diffusion Probabilistic Models (DDPM)</strong>. We model the data distribution $p(x)$ by learning to reverse a Markov diffusion process that gradually adds Gaussian noise to the image.
           </p>
           <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
-            Our implementation extends the standard DDPM to a <strong style={{ color: colors.text }}>Conditional</strong> setting, where the reverse process is guided by both the reference control state and the drug identity, effectively learning a transition operator <Latex>{`p(t|c,d)`}</Latex>.
+            Our implementation extends the standard DDPM to a <strong style={{ color: colors.text }}>Conditional</strong> setting, where the reverse process is guided by both the reference control state and the drug identity, effectively learning a transition operator $p(t|c,d)$.
           </p>
         </section>
 
@@ -189,19 +190,19 @@ const ResearchPaper = () => {
 
           <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.1 Architecture: The Conditional U-Net</h3>
           <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
-            The core generator is a pixel-space U-Net operating on <Latex>{`96 \times 96 \times 3`}</Latex> images (Channels: DNA, F-actin, β-tubulin).
+            The core generator is a pixel-space U-Net operating on $96 \times 96 \times 3$ images (Channels: DNA, F-actin, β-tubulin).
           </p>
           <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
-            <li><strong>Backbone:</strong> We utilize a 4-stage U-Net with channel multipliers <Latex>{`[1, 2, 4, 4]`}</Latex>.</li>
+            <li><strong>Backbone:</strong> We utilize a 4-stage U-Net with channel multipliers $[1, 2, 4, 4]$.</li>
             <li><strong>DownBlocks/UpBlocks:</strong> Feature extraction is performed via ResNet-style blocks (<code>ResBlock</code>) followed by spatial downsampling/upsampling.</li>
-            <li><strong>Attention Mechanisms:</strong> To capture global context (e.g., cell density, long-range cytoskeletal structures), we inject <strong>Multi-Head Self-Attention</strong> at the deeper resolutions (<Latex>{`16 \times 16`}</Latex> and <Latex>{`8 \times 8`}</Latex> feature maps).</li>
+            <li><strong>Attention Mechanisms:</strong> To capture global context (e.g., cell density, long-range cytoskeletal structures), we inject <strong>Multi-Head Self-Attention</strong> at the deeper resolutions ($16 \times 16$ and $8 \times 8$ feature maps).</li>
           </ul>
           <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
             <strong>Dual Conditioning Mechanism:</strong>
           </p>
           <ol style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
-            <li><strong>Structural Conditioning (The Control):</strong> The reference control image <Latex>{`c`}</Latex> is concatenated channel-wise to the noisy input <Latex>{`x_t`}</Latex>, resulting in a 6-channel input tensor. This provides the model with the exact spatial layout of the cells to be perturbed.</li>
-            <li><strong>Semantic Conditioning (The Drug):</strong> The chemical perturbation <Latex>{`d`}</Latex> is processed into a dense embedding <Latex>{`e_d`}</Latex> (derived from MoLFormer or Morgan Fingerprints). This embedding is injected into every <code>ResBlock</code> via a learnable projection layer (scale & shift), effectively modulating the feature maps based on the drug's identity.</li>
+            <li><strong>Structural Conditioning (The Control):</strong> The reference control image $c$ is concatenated channel-wise to the noisy input $x_t$, resulting in a 6-channel input tensor. This provides the model with the exact spatial layout of the cells to be perturbed.</li>
+            <li><strong>Semantic Conditioning (The Drug):</strong> The chemical perturbation $d$ is processed into a dense embedding $e_d$ (derived from MoLFormer or Morgan Fingerprints). This embedding is injected into every <code>ResBlock</code> via a learnable projection layer (scale & shift), effectively modulating the feature maps based on the drug's identity.</li>
           </ol>
 
           <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.2 Optimization Strategies (The Ablation Study)</h3>
@@ -214,7 +215,7 @@ const ResearchPaper = () => {
             ES is a gradient-free "black box" optimizer. It treats the diffusion model's parameter vector $\theta$ as a single point in a high-dimensional fitness landscape.
           </p>
           <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
-            <li><strong>Process:</strong> We spawn a population of <Latex>{`n`}</Latex> perturbed parameter vectors: <Latex>{`\theta + \sigma \epsilon_i`}</Latex>.</li>
+            <li><strong>Process:</strong> We spawn a population of $n$ perturbed parameter vectors: $\theta + \sigma \epsilon_i$.</li>
             <li><strong>Update:</strong> The model weights are updated in the direction of the population members that achieve higher biological fidelity (lower FID/Loss).</li>
             <li><strong>Challenge:</strong> While robust to non-differentiable objectives, ES faces the "curse of dimensionality" given the U-Net's millions of parameters.</li>
           </ul>
@@ -225,7 +226,7 @@ const ResearchPaper = () => {
           </p>
           <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
             <li><strong>Process:</strong> PPO utilizes the differentiable nature of the U-Net to backpropagate gradients from the reward function directly into the weights.</li>
-            <li><strong>Constraint:</strong> To prevent "mode collapse" (where the model ignores the physics of diffusion to cheat the reward), we employ a <strong>Clipped Surrogate Objective</strong> that penalizes large deviations from the pre-trained policy: <Latex>{`L^{CLIP}(\theta) = \mathbb{E}_t [\min(r_t(\theta) \hat{A}_t, \clip(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t)]`}</Latex>.</li>
+            <li><strong>Constraint:</strong> To prevent "mode collapse" (where the model ignores the physics of diffusion to cheat the reward), we employ a <strong>Clipped Surrogate Objective</strong> that penalizes large deviations from the pre-trained policy: $L^{CLIP}(\theta) = \mathbb{E}_t [\min(r_t(\theta) \hat{A}_t, \mathrm{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t)]$.</li>
           </ul>
 
           <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.3 The Biological Reward Function</h3>
@@ -234,7 +235,7 @@ const ResearchPaper = () => {
           </p>
           <ol style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
             <li><strong>DINOv2 Semantic Loss:</strong> We use <strong>DINOv2</strong>, a self-supervised Vision Transformer, to extract semantic features. DINOv2 is invariant to minor pixel shifts and focuses on texture and object properties (e.g., "is the nucleus fragmented?").</li>
-            <li><strong>DNA Channel Anchoring:</strong> Drug perturbations typically alter the cytoskeleton (Actin/Tubulin) but rarely translocate the nucleus instantly. We enforce a strict pixel-wise constraint on Channel 0 (DNA/DAPI) to "anchor" the prediction to the input control cell's location: <Latex>{`\mathcal{L}_{anchor} = \| \hat{x}_{:,0,:,:} - c_{:,0,:,:} \|_2^2`}</Latex>.</li>
+            <li><strong>DNA Channel Anchoring:</strong> Drug perturbations typically alter the cytoskeleton (Actin/Tubulin) but rarely translocate the nucleus instantly. We enforce a strict pixel-wise constraint on Channel 0 (DNA/DAPI) to "anchor" the prediction to the input control cell's location: $\mathcal{L}_{anchor} = \| \hat{x}_{:,0,:,:} - c_{:,0,:,:} \|_2^2$.</li>
           </ol>
 
           <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.4 Experimental Rigor: Batch-Aware Splitting</h3>
@@ -242,8 +243,8 @@ const ResearchPaper = () => {
             Biological datasets suffer from <strong>Batch Effects</strong>—variations in lighting and staining between experiments. A random split allows models to cheat by learning the "style" of a batch rather than the biology of the drug.
           </p>
           <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
-            <li><strong>Protocol:</strong> We implement <strong>Hard Batch-Holdout</strong>. If Batch <Latex>{`b`}</Latex> is in the Training Set, <em>zero</em> images from <Latex>{`b`}</Latex> appear in Validation or Test.</li>
-            <li><strong>Sampling:</strong> During training, for every perturbed sample <Latex>{`t`}</Latex> in Batch <Latex>{`b`}</Latex>, we dynamically sample a control <Latex>{`c`}</Latex> from the <em>same</em> Batch <Latex>{`b`}</Latex>. This forces the model to learn the differential mapping <Latex>{`p(t|c,d)`}</Latex> within the specific noise characteristics of that batch.</li>
+            <li><strong>Protocol:</strong> We implement <strong>Hard Batch-Holdout</strong>. If Batch $b$ is in the Training Set, <em>zero</em> images from $b$ appear in Validation or Test.</li>
+            <li><strong>Sampling:</strong> During training, for every perturbed sample $t$ in Batch $b$, we dynamically sample a control $c$ from the <em>same</em> Batch $b$. This forces the model to learn the differential mapping $p(t|c,d)$ within the specific noise characteristics of that batch.</li>
           </ul>
         </section>
 
