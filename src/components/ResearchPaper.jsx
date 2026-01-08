@@ -146,10 +146,110 @@ const ResearchPaper = () => {
           </div>
         </section>
 
-        {/* Pretraining Results */}
+        {/* Background & Related Work */}
         <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
             <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>2</span>
+            Background & Related Work
+          </h2>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2.1 The Unpaired Data Problem in High-Content Screening</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            High-Content Screening (HCS) generates massive datasets of cellular morphology to identify the phenotypic effects of chemical or genetic perturbations. However, a critical limitation persists: the imaging process is destructive. We cannot observe the same cell before and after treatment. Consequently, we possess the marginal distribution of control cells, $p(c)$, and the marginal distribution of treated cells, $p(t)$, but the joint trajectory $p(c,t)$ is lost. This forces us to learn a mapping between unpaired distributions rather than paired samples.
+          </p>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2.2 Theoretical Framework: Minimum Entropy Coupling (MEC)</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            To reconstruct this missing link, we adopt the principle of <strong style={{ color: colors.text }}>Minimum Entropy Coupling (MEC)</strong>. MEC postulates that among all possible joint distributions that satisfy the observed marginals, the biological reality is likely the one that minimizes the joint entropy $H(c,t)$.
+          </p>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            Minimizing the conditional entropy $H(t|c)$ enforces a deterministic coupling, aligning with the biological intuition that a specific drug mechanism (Mode of Action) triggers a consistent, structured morphological change rather than a random stochastic one.
+          </p>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2.3 Conditional Denoising Diffusion Probabilistic Models (DDPM)</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            While recent works like <strong style={{ color: colors.text }}>CellFlux</strong> (Zhang et al., 2025) explore Flow Matching for distribution alignment, we leverage the robust stability of <strong style={{ color: colors.text }}>Denoising Diffusion Probabilistic Models (DDPM)</strong>. We model the data distribution $p(x)$ by learning to reverse a Markov diffusion process that gradually adds Gaussian noise to the image.
+          </p>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            Our implementation extends the standard DDPM to a <strong style={{ color: colors.text }}>Conditional</strong> setting, where the reverse process is guided by both the reference control state and the drug identity, effectively learning a transition operator $p(t|c,d)$.
+          </p>
+        </section>
+
+        {/* Methodology */}
+        <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>3</span>
+            Methodology
+          </h2>
+
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            We propose a <strong style={{ color: colors.text }}>Batch-Aware Conditional Diffusion Framework</strong> for cellular morphology prediction. The system is composed of a U-Net backbone fine-tuned via Reinforcement Learning to maximize biological fidelity.
+          </p>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.1 Architecture: The Conditional U-Net</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+            The core generator is a pixel-space U-Net operating on $96 \times 96 \times 3$ images (Channels: DNA, F-actin, β-tubulin).
+          </p>
+          <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
+            <li><strong>Backbone:</strong> We utilize a 4-stage U-Net with channel multipliers $[1, 2, 4, 4]$.</li>
+            <li><strong>DownBlocks/UpBlocks:</strong> Feature extraction is performed via ResNet-style blocks (<code>ResBlock</code>) followed by spatial downsampling/upsampling.</li>
+            <li><strong>Attention Mechanisms:</strong> To capture global context (e.g., cell density, long-range cytoskeletal structures), we inject <strong>Multi-Head Self-Attention</strong> at the deeper resolutions ($16 \times 16$ and $8 \times 8$ feature maps).</li>
+          </ul>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+            <strong>Dual Conditioning Mechanism:</strong>
+          </p>
+          <ol style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
+            <li><strong>Structural Conditioning (The Control):</strong> The reference control image $c$ is concatenated channel-wise to the noisy input $x_t$, resulting in a 6-channel input tensor. This provides the model with the exact spatial layout of the cells to be perturbed.</li>
+            <li><strong>Semantic Conditioning (The Drug):</strong> The chemical perturbation $d$ is processed into a dense embedding $e_d$ (derived from MoLFormer or Morgan Fingerprints). This embedding is injected into every <code>ResBlock</code> via a learnable projection layer (scale & shift), effectively modulating the feature maps based on the drug's identity.</li>
+          </ol>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.2 Optimization Strategies (The Ablation Study)</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+            We rigorously compare two strategies for fine-tuning the U-Net to satisfy biological constraints.
+          </p>
+
+          <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>A. Evolution Strategies (ES)</h4>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+            ES is a gradient-free "black box" optimizer. It treats the diffusion model's parameter vector $\theta$ as a single point in a high-dimensional fitness landscape.
+          </p>
+          <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
+            <li><strong>Process:</strong> We spawn a population of $n$ perturbed parameter vectors: $\theta + \sigma \epsilon_i$.</li>
+            <li><strong>Update:</strong> The model weights are updated in the direction of the population members that achieve higher biological fidelity (lower FID/Loss).</li>
+            <li><strong>Challenge:</strong> While robust to non-differentiable objectives, ES faces the "curse of dimensionality" given the U-Net's millions of parameters.</li>
+          </ul>
+
+          <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>B. Proximal Policy Optimization (PPO)</h4>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+            PPO is a policy-gradient Reinforcement Learning algorithm. We treat the iterative denoising process as a "trajectory" and the generated image quality as the "reward."
+          </p>
+          <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
+            <li><strong>Process:</strong> PPO utilizes the differentiable nature of the U-Net to backpropagate gradients from the reward function directly into the weights.</li>
+            <li><strong>Constraint:</strong> To prevent "mode collapse" (where the model ignores the physics of diffusion to cheat the reward), we employ a <strong>Clipped Surrogate Objective</strong> that penalizes large deviations from the pre-trained policy: $L^{CLIP}(\theta) = \mathbb{E}_t [\min(r_t(\theta) \hat{A}_t, \clip(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t)]$.</li>
+          </ul>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.3 The Biological Reward Function</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+            Standard pixel-wise MSE is insufficient for biology; a cell shifted by 2 pixels has high MSE but perfect biological validity. We introduce a composite <strong>Bio-Perceptual Loss</strong>:
+          </p>
+          <ol style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
+            <li><strong>DINOv2 Semantic Loss:</strong> We use <strong>DINOv2</strong>, a self-supervised Vision Transformer, to extract semantic features. DINOv2 is invariant to minor pixel shifts and focuses on texture and object properties (e.g., "is the nucleus fragmented?").</li>
+            <li><strong>DNA Channel Anchoring:</strong> Drug perturbations typically alter the cytoskeleton (Actin/Tubulin) but rarely translocate the nucleus instantly. We enforce a strict pixel-wise constraint on Channel 0 (DNA/DAPI) to "anchor" the prediction to the input control cell's location: $\mathcal{L}_{anchor} = \| \hat{x}_{:,0,:,:} - c_{:,0,:,:} \|_2^2$.</li>
+          </ol>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>3.4 Experimental Rigor: Batch-Aware Splitting</h3>
+          <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+            Biological datasets suffer from <strong>Batch Effects</strong>—variations in lighting and staining between experiments. A random split allows models to cheat by learning the "style" of a batch rather than the biology of the drug.
+          </p>
+          <ul style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px', paddingLeft: '20px' }}>
+            <li><strong>Protocol:</strong> We implement <strong>Hard Batch-Holdout</strong>. If Batch $b$ is in the Training Set, <em>zero</em> images from $b$ appear in Validation or Test.</li>
+            <li><strong>Sampling:</strong> During training, for every perturbed sample $t$ in Batch $b$, we dynamically sample a control $c$ from the <em>same</em> Batch $b$. This forces the model to learn the differential mapping $p(t|c,d)$ within the specific noise characteristics of that batch.</li>
+          </ul>
+        </section>
+
+        {/* Pretraining Results */}
+        <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>4</span>
             Pretraining (187 Epochs)
           </h2>
 
@@ -193,7 +293,7 @@ const ResearchPaper = () => {
         {/* Final Results - NEW TABLES */}
         <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>3</span>
+            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>5</span>
             Final Results (Test Set, N=5,000)
           </h2>
 
@@ -300,7 +400,7 @@ const ResearchPaper = () => {
         {/* Training Dynamics */}
         <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>4</span>
+            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>6</span>
             Training Dynamics
           </h2>
 
@@ -334,7 +434,7 @@ const ResearchPaper = () => {
         {/* Analysis */}
         <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>5</span>
+            <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>7</span>
             Analysis
           </h2>
 
@@ -374,7 +474,7 @@ const ResearchPaper = () => {
         {/* Conclusion */}
         <section style={{ background: 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)', borderRadius: '16px', padding: '32px', marginBottom: '32px', color: 'white' }}>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px' }}>
-            <span style={{ background: 'rgba(255,255,255,0.2)', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>6</span>
+            <span style={{ background: 'rgba(255,255,255,0.2)', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>8</span>
             Conclusion
           </h2>
           <p style={{ lineHeight: 1.8, marginBottom: '20px', opacity: 0.95 }}>

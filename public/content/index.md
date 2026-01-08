@@ -3,25 +3,43 @@ layout: default
 use_math: true
 ---
 
-# Evolution Strategies vs PPO for Coupled Diffusion Models: A Comprehensive Ablation Study Across Dimensions
+# Evolution Strategies vs PPO for Cellular Morphology Prediction: BBBC021 Study
 
-**Author**: Research Team  
-**Date**: December 13, 2024  
-**Experiment ID**: `run_20251211_215609`
+**Diffusion-based Minimum Entropy Coupling for Drug-Induced Cellular Morphology Prediction**
+
+**Author**: Research Team
+**Date**: January 8, 2026
+**Dataset**: BBBC021 (97,504 images, 113 compounds, 26 MoA classes)
 
 ---
 
 ## 1. Background & Motivation
 
-### 1.1 Problem Statement
+### 1.1 The Unpaired Data Problem in High-Content Screening
 
-Denoising Diffusion Probabilistic Models (DDPMs) have demonstrated remarkable capabilities in generative modeling, but training conditional DDPMs to learn complex joint distributions remains challenging. Specifically, when we need to learn coupled conditional distributions \( p(X_1 | X_2) \) and \( p(X_2 | X_1) \) where \( X_1, X_2 \in \mathbb{R}^d \) are related random variables, gradient-based optimization methods may struggle due to:
+High-Content Screening (HCS) generates massive datasets of cellular morphology to identify the phenotypic effects of chemical or genetic perturbations. However, a critical limitation persists: the imaging process is destructive. We cannot observe the same cell before and after treatment. Consequently, we possess the marginal distribution of control cells, \( p(X_{\text{control}}) \), and the marginal distribution of treated cells, \( p(X_{\text{treated}}) \), but the joint trajectory \( p(X_{\text{control}}, X_{\text{treated}}) \) is lost. This forces us to learn a mapping between unpaired distributions rather than paired samples.
 
-1. **High-dimensional noise landscapes**: The stochastic nature of diffusion training introduces significant variance in gradient estimates
-2. **Coupling quality degradation**: As dimensionality \( d \) increases, maintaining accurate conditional dependencies becomes increasingly difficult
-3. **Optimization landscape complexity**: The interplay between marginal quality (matching \( p(X_1) \) and \( p(X_2) \)) and coupling quality (preserving mutual information) creates a multi-objective optimization challenge
+### 1.2 Theoretical Framework: Minimum Entropy Coupling (MEC)
 
-### 1.2 Motivation for This Study
+To reconstruct this missing link, we adopt the principle of **Minimum Entropy Coupling (MEC)**. MEC postulates that among all possible joint distributions that satisfy the observed marginals, the biological reality is likely the one that minimizes the joint entropy \( H(X_{\text{control}}, X_{\text{treated}}) \).
+
+\[
+\min_{\pi \in \Pi(p_{\text{control}}, p_{\text{treated}})} H(\pi)
+\]
+
+Minimizing the conditional entropy \( H(X_{\text{treated}} | X_{\text{control}}) \) enforces a deterministic coupling, aligning with the biological intuition that a specific drug mechanism (Mode of Action) triggers a consistent, structured morphological change rather than a random stochastic one.
+
+### 1.3 Conditional Denoising Diffusion Probabilistic Models (DDPM)
+
+While recent works like **CellFlux** (Zhang et al., 2025) explore Flow Matching for distribution alignment, we leverage the robust stability of **Denoising Diffusion Probabilistic Models (DDPM)**. We model the data distribution \( p(x_0) \) by learning to reverse a Markov diffusion process that gradually adds Gaussian noise to the image.
+
+\[
+q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)
+\]
+
+Our implementation extends the standard DDPM to a **Conditional** setting, where the reverse process is guided by both the reference control state and the drug identity, effectively learning a transition operator \( T_{\text{drug}}: X_{\text{control}} \to X_{\text{treated}} \).
+
+### 1.4 Motivation for ES vs PPO Comparison
 
 While gradient descent with policy-based methods like Proximal Policy Optimization (PPO) has become standard in training conditional diffusion models, Evolution Strategies (ES) offer a fundamentally different optimization paradigm:
 
@@ -29,209 +47,161 @@ While gradient descent with policy-based methods like Proximal Policy Optimizati
 - **Population-based exploration**: ES maintains multiple parameter candidates simultaneously, potentially avoiding local optima
 - **Robustness to noise**: ES may be less sensitive to stochastic gradient variance
 
-However, ES's performance in the context of conditional diffusion model training remains under-explored, particularly as problem dimensionality scales. This study conducts a systematic ablation across dimensions \( d \in \{1, 2, 5, 10, 20, 30\} \) to understand:
-
-1. **Hyperparameter sensitivity**: How do key hyperparameters (ES: \( \sigma, \alpha \); PPO: KL weight, clip parameter, learning rate) affect training across dimensions?
-2. **Scalability**: At what dimensionality does each method break down?
-3. **Information-theoretic coupling quality**: How well does each method preserve mutual information \( I(X_1; X_2) \) while learning accurate marginals?
-
-### 1.3 Theoretical Context
-
-**Diffusion Models**: A DDPM defines a forward diffusion process that progressively adds Gaussian noise to data \( x_0 \):
-
-\[
-q(x_t | x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)
-\]
-
-where \( \bar{\alpha}_t = \prod_{s=1}^t (1 - \beta_s) \) with variance schedule \( \{\beta_t\}_{t=1}^T \). The reverse process learns to denoise:
-
-\[
-p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
-\]
-
-Training objective (simplified):
-
-\[
-\mathcal{L}_{\text{simple}} = \mathbb{E}_{t, x_0, \epsilon} \left[ \| \epsilon - \epsilon_\theta(x_t, t) \|^2 \right]
-\]
-
-**Conditional Extension**: For conditional generation \( p(x | y) \), the model becomes \( \epsilon_\theta(x_t, t, y) \).
-
-**Evolution Strategies**: ES optimizes parameters \( \theta \) by sampling perturbations \( \epsilon_i \sim \mathcal{N}(0, \sigma^2 I) \) and updating:
-
-\[
-\theta_{k+1} = \theta_k + \alpha \frac{1}{n\sigma} \sum_{i=1}^n F(\theta_k + \epsilon_i) \epsilon_i
-\]
-
-where \( F(\cdot) \) is fitness (negative loss), \( \alpha \) is learning rate, \( \sigma \) is exploration noise, and \( n \) is population size.
-
-**PPO for Diffusion**: While PPO was originally designed for reinforcement learning, it can be adapted for diffusion training by treating the denoising process as a sequential decision problem. The PPO objective includes:
-
-\[
-\mathcal{L}^{\text{PPO}} = \mathbb{E}_t \left[ \min\left( r_t(\theta) \hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t \right) - \lambda_{\text{KL}} D_{\text{KL}}(p_{\theta_{\text{old}}} \| p_\theta) \right]
-\]
-
-where \( r_t(\theta) = \frac{p_\theta(x_t)}{p_{\theta_{\text{old}}}(x_t)} \) is the probability ratio, \( \hat{A}_t \) is an advantage estimate, \( \lambda_{\text{KL}} \) is the KL penalty weight, and \( \epsilon \) is the clipping parameter.
+However, ES's performance in the context of high-dimensional cellular image generation remains under-explored. This study provides a rigorous empirical comparison of ES and PPO for fine-tuning conditional diffusion models on the BBBC021 dataset (96×96×3 images, 113 compounds, 26 MoA classes).
 
 ---
 
 ## 2. Methodology
 
-### 2.1 Problem Formulation
+We propose a **Batch-Aware Conditional Diffusion Framework** for cellular morphology prediction. The system is composed of a U-Net backbone fine-tuned via Reinforcement Learning to maximize biological fidelity.
 
-We consider a synthetic coupled Gaussian distribution designed to test conditional generation:
+### 2.1 Architecture: The Conditional U-Net
+
+The core generator is a pixel-space U-Net operating on \( 96 \times 96 \times 3 \) images (Channels: DNA, F-actin, β-tubulin).
+
+**Backbone:** We utilize a 4-stage U-Net with channel multipliers \( [192, 384, 768, 768] \).
+
+**DownBlocks/UpBlocks:** Feature extraction is performed via ResNet-style blocks (`ResBlock`) followed by spatial downsampling/upsampling.
+
+**Attention Mechanisms:** To capture global context (e.g., cell density, long-range cytoskeletal structures), we inject **Multi-Head Self-Attention** at the deeper resolutions (\( 24 \times 24 \) and \( 12 \times 12 \) feature maps).
 
 \[
-\begin{aligned}
-X_1 &\sim \mathcal{N}(2 \cdot \mathbf{1}_d, I_d) \\
-X_2 &= X_1 + 8 \cdot \mathbf{1}_d
-\end{aligned}
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
 \]
 
-where \( \mathbf{1}_d \in \mathbb{R}^d \) is the all-ones vector. This creates a deterministic coupling with known ground truth: \( X_2 = X_1 + 8 \). The task is to learn:
+**Dual Conditioning Mechanism:**
 
-1. \( p_\theta(X_1 | X_2) \): Should generate \( X_1 \approx X_2 - 8 \)
-2. \( p_\phi(X_2 | X_1) \): Should generate \( X_2 \approx X_1 + 8 \)
+1. **Structural Conditioning (The Control):** The reference control image \( x_{\text{control}} \) is concatenated channel-wise to the noisy input \( x_t \), resulting in a 6-channel input tensor. This provides the model with the exact spatial layout of the cells to be perturbed.
 
-### 2.2 Model Architecture
+2. **Semantic Conditioning (The Drug):** The chemical perturbation \( c_{\text{drug}} \) is processed into a dense embedding \( e_{\text{drug}} \in \mathbb{R}^{768} \) (derived from MoLFormer or Morgan Fingerprints). This embedding is injected into every `ResBlock` via a learnable projection layer (scale & shift), effectively modulating the feature maps based on the drug's identity.
 
-**Unconditional DDPM**: Multi-layer perceptron (MLP) with time embedding:
+\[
+\epsilon_\theta(x_t, t, x_{\text{control}}, c_{\text{drug}}) = \text{UNet}([x_t \| x_{\text{control}}], t, e_{\text{drug}})
+\]
 
-```
-TimeEmbedding: Linear(1 → 64) → SiLU → Linear(64 → 64) → SiLU
-MainNetwork: Linear(d + 64 → 128) → SiLU → Linear(128 → 128) → SiLU 
-             → Linear(128 → 128) → SiLU → Linear(128 → d)
-```
+### 2.2 Training Procedure
 
-**Conditional DDPM**: Extended to accept condition vector \( y \in \mathbb{R}^d \):
+**Phase 1: Unconditional Pretraining (187 Epochs)**
 
-```
-Linear(2d + 64 → 128) → ... (same as above)
-```
+We first train an unconditional DDPM on the full BBBC021 dataset to learn the general morphology distribution \( p(x) \):
 
-The network predicts noise \( \epsilon_\theta(x_t, t, y) \) at each timestep \( t \).
-
-### 2.3 Training Procedure
-
-**Phase 1: Unconditional Pretraining**
-
-1. Train separate unconditional DDPMs for \( p(X_1) \) and \( p(X_2) \) using standard DDPM loss
-2. Hyperparameters:
-   - Epochs: 200
-   - Batch size: 128
-   - Learning rate: 0.001
-   - Timesteps: 1000
-   - Samples: 50,000
-   - Beta schedule: Linear from \( 10^{-4} \) to \( 0.02 \)
+- **Dataset:** 74,090 training images (40 batches)
+- **Architecture:** U-Net with channels [192, 384, 768, 768]
+- **Loss:** Standard DDPM objective \( \mathcal{L}_{\text{simple}} = \mathbb{E}_{t, x_0, \epsilon} \left[ \| \epsilon - \epsilon_\theta(x_t, t) \|^2 \right] \)
+- **Timesteps:** 1000 (cosine schedule)
+- **Result:** FID converges to 31.21 at epoch 150
 
 **Phase 2: Conditional Coupling Training**
 
 Three-stage training protocol:
 
-1. **Initialization**: Copy pretrained unconditional weights to conditional models (weight transfer for matching layers)
-2. **Warmup (15 epochs)**: Standard gradient descent to stabilize conditional models
-3. **Method-specific fine-tuning (15 epochs)**: Apply ES or PPO
+1. **Initialization:** Transfer pretrained weights to the conditional U-Net (new channels initialized with small Gaussian noise)
+2. **Warmup:** Standard gradient descent to stabilize conditional generation
+3. **Method-specific fine-tuning:** Apply ES or PPO with biological reward function
 
 This design ensures fair comparison: both methods start from the same warmup checkpoint.
 
-### 2.4 Evolution Strategies Implementation
+### 2.3 Optimization Strategies (The Ablation Study)
 
-Population size fixed at \( n = 30 \). For each training step:
+We rigorously compare two strategies for fine-tuning the U-Net to satisfy biological constraints.
 
-1. Extract current parameters: \( \theta = \text{flatten}(\{\mathbf{W}_i, \mathbf{b}_i\}) \)
-2. Generate population: \( \theta_i = \theta + \epsilon_i \), where \( \epsilon_i \sim \mathcal{N}(0, \sigma^2 I) \)
-3. Evaluate fitness (no gradients):
-   \[
-   F(\theta_i) = -\mathbb{E}_{(x, y) \sim \text{batch}} \left[ \|\epsilon_\theta(x_t, t, y) - \epsilon\|^2 \right]
-   \]
-4. Normalize fitnesses: \( \tilde{F}_i = \frac{F_i - \bar{F}}{\text{std}(F) + 10^{-8}} \)
-5. Compute gradient estimate:
-   \[
-   \nabla_\theta F \approx \frac{1}{n\sigma} \sum_{i=1}^n \tilde{F}_i \epsilon_i
-   \]
-6. Update with gradient clipping (max norm = 1.0):
-   \[
-   \theta \leftarrow \theta + \alpha \cdot \text{clip}(\nabla_\theta F)
-   \]
+#### **A. Evolution Strategies (ES)**
 
-**Ablation Grid**:
-- \( \sigma \in \{0.001, 0.002, 0.005, 0.01\} \) (exploration noise)
-- \( \alpha \in \{0.0005, 0.001, 0.002, 0.005\} \) (learning rate)
-- Total: 16 configurations per dimension
+ES is a gradient-free "black box" optimizer. It treats the diffusion model's parameter vector \( \theta \) as a single point in a high-dimensional fitness landscape.
 
-### 2.5 PPO-DDMEC Implementation
+**Process:** We spawn a population of \( n = 30 \) perturbed parameter vectors: \( \theta_i = \theta + \sigma \epsilon_i, \quad \epsilon_i \sim \mathcal{N}(0, I) \).
 
-Simplified PPO adapted for diffusion:
+**Update:** The model weights are updated in the direction of the population members that achieve higher biological fidelity (lower FID/Loss).
 
-1. Predict noise with old policy: \( \epsilon_{\text{old}} = \epsilon_{\theta_{\text{old}}}(x_t, t, y) \) (detached)
-2. Predict noise with new policy: \( \epsilon = \epsilon_\theta(x_t, t, y) \)
-3. Compute loss:
-   \[
-   \mathcal{L} = \|\epsilon - \epsilon_{\text{true}}\|^2 + \lambda_{\text{KL}} \|\epsilon - \epsilon_{\text{old}}\|^2
-   \]
-4. Gradient descent update
+\[
+\theta_{k+1} = \theta_k + \alpha \frac{1}{n\sigma} \sum_{i=1}^n F(\theta_i) \epsilon_i
+\]
 
-**Ablation Grid**:
-- \( \lambda_{\text{KL}} \in \{0.1, 0.3, 0.5, 0.7\} \) (KL penalty weight)
-- \( \epsilon_{\text{clip}} \in \{0.05, 0.1, 0.2, 0.3\} \) (clipping parameter, used for ratio clamping)
-- \( \alpha \in \{5 \times 10^{-5}, 10^{-4}, 2 \times 10^{-4}, 5 \times 10^{-4}\} \) (learning rate)
-- Total: 64 configurations per dimension
+**Challenge:** While robust to non-differentiable objectives, ES faces the "curse of dimensionality" given the U-Net's millions of parameters.
+
+#### **B. Proximal Policy Optimization (PPO)**
+
+PPO is a policy-gradient Reinforcement Learning algorithm. We treat the iterative denoising process as a "trajectory" and the generated image quality as the "reward."
+
+**Process:** PPO utilizes the differentiable nature of the U-Net to backpropagate gradients from the reward function directly into the weights.
+
+**Constraint:** To prevent "mode collapse" (where the model ignores the physics of diffusion to cheat the reward), we employ a **Clipped Surrogate Objective** that penalizes large deviations from the pre-trained policy:
+
+\[
+\mathcal{L}^{\text{PPO}} = \|\epsilon - \epsilon_{\text{true}}\|^2 + \lambda_{\text{KL}} \|\epsilon - \epsilon_{\text{old}}\|^2
+\]
+
+### 2.4 The Biological Reward Function
+
+Standard pixel-wise MSE is insufficient for biology; a cell shifted by 2 pixels has high MSE but perfect biological validity. We introduce a composite **Bio-Perceptual Loss**:
+
+**1. DINOv2 Semantic Loss:** We use **DINOv2**, a self-supervised Vision Transformer, to extract semantic features. DINOv2 is invariant to minor pixel shifts and focuses on texture and object properties (e.g., "is the nucleus fragmented?").
+
+\[
+\mathcal{L}_{\text{DINO}} = \| \text{DINOv2}(x_{\text{gen}}) - \text{DINOv2}(x_{\text{true}}) \|_2^2
+\]
+
+**2. DNA Channel Anchoring:** Drug perturbations typically alter the cytoskeleton (Actin/Tubulin) but rarely translocate the nucleus instantly. We enforce a strict pixel-wise constraint on Channel 0 (DNA/DAPI) to "anchor" the prediction to the input control cell's location:
+
+\[
+\mathcal{L}_{\text{DNA}} = \| x_{\text{gen}}[:, 0, :, :] - x_{\text{control}}[:, 0, :, :] \|_2^2
+\]
+
+### 2.5 Experimental Rigor: Batch-Aware Splitting
+
+Biological datasets suffer from **Batch Effects**—variations in lighting and staining between experiments. A random split allows models to cheat by learning the "style" of a batch rather than the biology of the drug.
+
+**Protocol:** We implement **Hard Batch-Holdout**. If Batch \( B \) is in the Training Set, *zero* images from \( B \) appear in Validation or Test.
+
+**Sampling:** During training, for every perturbed sample \( x_{\text{treated}} \) in Batch \( B \), we dynamically sample a control \( x_{\text{control}} \) from the *same* Batch \( B \). This forces the model to learn the differential mapping \( \Delta_{\text{drug}} \) within the specific noise characteristics of that batch.
+
+| Split | Rows | Treated | Control | Batches |
+|-------|------|---------|---------|---------|
+| TRAIN | 74,090 | 68,692 | 5,398 | 40 |
+| VAL | 13,626 | 12,814 | 812 | 6 |
+| TEST | 9,788 | 9,098 | 690 | 46 |
 
 ### 2.6 Evaluation Metrics
 
-We evaluate coupling quality using rigorous information-theoretic metrics:
+We evaluate morphology prediction quality using standard generative model metrics adapted for biology:
 
-**1. KL Divergence (Marginal Quality)**:
+**1. Fréchet Inception Distance (FID) - Overall Quality**
 
-\[
-D_{\text{KL}}(p_{\text{true}} \| p_{\text{learned}}) = \sum_{i=1}^d \left[ \frac{(\mu_i^{\text{learned}} - \mu_i^{\text{true}})^2}{\sigma_i^{\text{true}2}} + \frac{\sigma_i^{\text{learned}2}}{\sigma_i^{\text{true}2}} - 1 + \log\frac{\sigma_i^{\text{true}2}}{\sigma_i^{\text{learned}2}} \right]
-\]
-
-**2. Mutual Information (Coupling Quality)**:
-
-For generated samples \( \{(x_1^{(i)}, x_2^{(i)})\} \):
+Measures distributional similarity between generated and real images using Inception-v3 features:
 
 \[
-I(X_1; X_2) = H(X_1) + H(X_2) - H(X_1, X_2)
+\text{FID} = \|\mu_{\text{real}} - \mu_{\text{gen}}\|^2 + \text{Tr}\left(\Sigma_{\text{real}} + \Sigma_{\text{gen}} - 2(\Sigma_{\text{real}}\Sigma_{\text{gen}})^{1/2}\right)
 \]
 
-where entropies are estimated via Gaussian assumption:
+Lower FID indicates better overall image quality and distribution matching.
+
+**2. FID Conditional - Drug-Specific Fidelity**
+
+Computed *per compound class*, then averaged. This metric directly tests whether the model generates the specific phenotype for each drug, not just generic cells:
 
 \[
-H(X) = \frac{1}{2} \log\left((2\pi e)^d \det(\Sigma_X)\right)
+\text{FID}_{\text{cond}} = \frac{1}{|C|} \sum_{c \in C} \text{FID}(p_{\text{real}}^c, p_{\text{gen}}^c)
 \]
 
-**3. Directional Mutual Information**:
+where \( C \) is the set of compound classes. A large gap between FID Overall and FID Conditional indicates mode collapse.
 
-Measures conditional generation quality:
+**3. Kernel Inception Distance (KID)**
+
+More robust to sample size than FID, computed using Maximum Mean Discrepancy:
 
 \[
-I(X_2^{\text{true}}; X_1^{\text{gen}}) = H(X_2^{\text{true}}) + H(X_1^{\text{gen}}) - H(X_2^{\text{true}}, X_1^{\text{gen}})
+\text{KID} = \mathbb{E}[k(x, x')] + \mathbb{E}[k(y, y')] - 2\mathbb{E}[k(x, y)]
 \]
 
-**4. Conditional Entropy**:
+where \( k \) is a polynomial kernel on Inception features.
 
-\[
-H(X_1 | X_2) = H(X_1, X_2) - H(X_2)
-\]
+**4. SSIM and Correlation (Pretraining Only)**
 
-Lower conditional entropy indicates better coupling (ideally \( H(X_1|X_2) \approx 0 \) for deterministic relationship).
+For unconditional pretraining validation:
+- **SSIM:** Structural similarity between generated and real images
+- **Correlation:** Pearson correlation of pixel intensities
 
-**5. Correlation**:
-
-Average Pearson correlation across dimensions:
-
-\[
-\rho = \frac{1}{d} \sum_{i=1}^d \frac{\text{Cov}(X_{1,i}^{\text{gen}}, X_{2,i}^{\text{true}})}{\sigma_{X_1^{\text{gen}}} \sigma_{X_2^{\text{true}}}}
-\]
-
-**6. Mean Absolute Error (MAE)**:
-
-\[
-\text{MAE}_{2 \to 1} = \mathbb{E}\left[ |X_1^{\text{gen}} - (X_2^{\text{true}} - 8)| \right]
-\]
-
-All metrics computed on 1,000 test samples using 100 DDPM sampling steps.
+All metrics computed on 5,000 test samples using 100 DDPM sampling steps with classifier-free guidance (w=4.0).
 
 ---
 
