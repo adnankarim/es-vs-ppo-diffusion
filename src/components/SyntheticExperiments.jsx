@@ -1,6 +1,8 @@
 import React from 'react';
 import Latex from 'react-latex-next';
 import AblationStudy from './AblationStudy';
+import ImageModal from './ImageModal';
+import { useState } from 'react';
 import 'katex/dist/katex.min.css';
 
 const colors = {
@@ -11,6 +13,8 @@ const colors = {
 };
 
 const SyntheticExperiments = () => {
+    const [modalImage, setModalImage] = useState(null);
+
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 20px', fontFamily: '"IBM Plex Sans", sans-serif', color: colors.text }}>
 
@@ -84,10 +88,53 @@ const SyntheticExperiments = () => {
                 </p>
             </section>
 
-            {/* 3. Experimental Setup */}
+            {/* 3. Pretraining Validation (NEW) */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
                     <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>3</span>
+                    Pretraining Validation
+                </h2>
+                <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
+                    Before initiating the RL fine-tuning process, it is crucial to verify that the base Diffusion Model (DDPM) has correctly learned the underlying data distribution. We pre-trained the model for 50 epochs on the uncoupled dataset, where <Latex>{`$\\mathbf{x}_1$`}</Latex> and <Latex>{`$\\mathbf{x}_2$`}</Latex> are independent Gaussian variables.
+                </p>
+                <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
+                    The following visualizations display the generated samples (blue) overlaid on the ground truth distributions (orange) across increasing dimensions. The close alignment confirms that the pre-trained model effectively captures the independent marginals, providing a stable foundation for the subsequent "coupling" fine-tuning task.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '32px' }}>
+                    {[
+                        { dim: '1D', src: '/pretrain/pretrain_1d/ddpm_x1_timeseries_epoch_50.png' },
+                        { dim: '2D', src: '/pretrain/pretrain_2d/ddpm_x1_timeseries_epoch_50.png' },
+                        { dim: '5D', src: '/pretrain/pretrain_5d/ddpm_x1_timeseries_epoch_50.png' },
+                        { dim: '10D', src: '/pretrain/pretrain_10d/ddpm_x1_timeseries_epoch_50.png' },
+                    ].map((item, index) => (
+                        <div key={index} style={{ textAlign: 'center' }}>
+                            <div style={{
+                                borderRadius: '12px',
+                                overflow: 'hidden',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                                border: '1px solid #e2e8f0',
+                                marginBottom: '12px'
+                            }}>
+                                <img
+                                    src={item.src}
+                                    alt={`${item.dim} Pretraining Result`}
+                                    style={{ width: '100%', height: 'auto', display: 'block', cursor: 'pointer' }}
+                                    onClick={() => setModalImage({ src: item.src, alt: `${item.dim} Pretraining Result` })}
+                                />
+                            </div>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: colors.textLight }}>
+                                {item.dim} Pretraining (Epoch 50)
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* 4. Experimental Setup */}
+            <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>4</span>
                     Experimental Setup
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
@@ -117,10 +164,10 @@ const SyntheticExperiments = () => {
                 </div>
             </section>
 
-            {/* 4. Results (Embed AblationStudy) */}
+            {/* 5. Results (Embed AblationStudy) */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>4</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>5</span>
                     Results
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
@@ -136,16 +183,16 @@ const SyntheticExperiments = () => {
                     <strong>Metric Definitions:</strong>
                 </p>
                 <ul style={{ lineHeight: 1.8, listStyleType: 'disc', paddingLeft: '24px', color: colors.textLight }}>
-                    <li style={{ marginBottom: '8px' }}><strong>Score:</strong> The mean reward obtained (higher is better). Reflects alignment with the <Latex>{`$\\mathbf{x}_2 = \\mathbf{x}_1 + 8$`}</Latex> target.</li>
+                    <li style={{ marginBottom: '8px' }}><strong>Score:</strong> The mean reward obtained (higher is better). This is computed as the negative Mean Absolute Error (MAE) between the generated <Latex>{`$\\mathbf{x}_2$`}</Latex> and the target <Latex>{`$\\mathbf{x}_1 + 8$`}</Latex>. A score closer to 0 indicates higher fidelity to the coupling constraint, while lower (more negative) scores indicate deviation.</li>
                     <li style={{ marginBottom: '8px' }}><strong>MI (Mutual Information):</strong> A measure of mutual dependence between the two variables. High MI indicates successful coupling.</li>
                     <li style={{ marginBottom: '8px' }}><strong>KL (Kullback-Leibler Divergence):</strong> Measures deviation from the original Gaussian marginals. A lower KL indicates the model preserved the original distribution structure while learning the coupling.</li>
                 </ul>
             </section>
 
-            {/* 5. Hyperparameter Sensitivity (NEW) */}
+            {/* 6. Hyperparameter Sensitivity (NEW) */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>5</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>6</span>
                     Hyperparameter Sensitivity Analysis
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
@@ -194,10 +241,10 @@ const SyntheticExperiments = () => {
                 </div>
             </section>
 
-            {/* 6. Discussion */}
+            {/* 7. Discussion */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>6</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>7</span>
                     Discussion
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
@@ -208,10 +255,10 @@ const SyntheticExperiments = () => {
                 </p>
             </section>
 
-            {/* 7. Conclusion */}
+            {/* 8. Conclusion */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>7</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>8</span>
                     Conclusion
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
@@ -228,6 +275,12 @@ const SyntheticExperiments = () => {
                     <li style={{ marginBottom: '8px' }}>Schulman, J., et al. (2017). "Proximal Policy Optimization Algorithms." <em>arXiv preprint arXiv:1707.06347</em>.</li>
                 </ol>
             </section>
+
+            <ImageModal
+                src={modalImage?.src}
+                alt={modalImage?.alt}
+                onClose={() => setModalImage(null)}
+            />
 
         </div>
     );

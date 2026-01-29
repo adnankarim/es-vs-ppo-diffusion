@@ -372,35 +372,393 @@ const BiologicalExperiments = () => {
                             </div>
 
                             {/* Summary Table */}
-                            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', textTransform: 'uppercase', color: colors.textLight }}>Final Performance Summary</h4>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', marginBottom: '24px' }}>
-                                <thead>
-                                    <tr style={{ background: '#f1f5f9' }}>
-                                        <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #cbd5e1' }}>Model</th>
-                                        <th style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid #cbd5e1' }}>Final Loss</th>
-                                        <th style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid #cbd5e1' }}>FID Overall ↓</th>
-                                        <th style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid #cbd5e1' }}>FID Cond ↓</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                        <td style={{ padding: '12px', fontWeight: 'bold', color: colors.theta }}>Forward (<Latex>{String.raw`$\theta$`}</Latex>)</td>
-                                        <td style={{ padding: '12px', textAlign: 'center' }}>0.0033</td>
-                                        <td style={{ padding: '12px', textAlign: 'center', fontWeight: 'bold' }}>24.49</td>
-                                        <td style={{ padding: '12px', textAlign: 'center' }}>118.22</td>
-                                    </tr>
-                                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                        <td style={{ padding: '12px', fontWeight: 'bold', color: colors.phi }}>Inverse (<Latex>{String.raw`$\phi$`}</Latex>)</td>
-                                        <td style={{ padding: '12px', textAlign: 'center' }}>0.0046</td>
-                                        <td style={{ padding: '12px', textAlign: 'center', fontWeight: 'bold' }}>43.97</td>
-                                        <td style={{ padding: '12px', textAlign: 'center' }}>148.70</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            {/* Qualitative Evaluation */}
+                            <div style={{ marginBottom: '48px' }}>
+                                <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '16px', textTransform: 'uppercase', color: colors.textLight }}>C. Qualitative Evaluation (Epoch 100)</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+
+                                    {/* Forward Sample */}
+                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ background: colors.theta, color: 'white', fontSize: '12px', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}>Forward</span>
+                                            <span style={{ fontSize: '14px', color: colors.text, fontWeight: 600 }}>Control → Treated</span>
+                                        </div>
+                                        <div
+                                            style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                                            onClick={() => setModalImage({ src: "/bio/theta/theta_epoch_100.png", alt: "Forward Model Evaluation (Epoch 100)" })}
+                                        >
+                                            <img
+                                                src="/bio/theta/theta_epoch_100.png"
+                                                alt="Forward Evaluation"
+                                                style={{ width: '100%', height: 'auto', display: 'block' }}
+                                            />
+                                        </div>
+                                        <p style={{ marginTop: '12px', fontSize: '13px', color: colors.textLight, lineHeight: 1.5 }}>
+                                            Generated samples (right) show accurate cytoskeletal reorganization matching the target drug profile while preserving cell count.
+                                        </p>
+                                        <div style={{ marginTop: '16px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                                            <video controls style={{ width: '100%', display: 'block' }}>
+                                                <source src="/bio/theta/theta_video_100.mp4" type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <div style={{ padding: '8px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid #e2e8f0', fontSize: '11px', color: colors.textLight, textAlign: 'center' }}>
+                                                Training Evolution (Epoch 1-100)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Inverse Sample */}
+                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ background: colors.phi, color: 'white', fontSize: '12px', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}>Inverse</span>
+                                            <span style={{ fontSize: '14px', color: colors.text, fontWeight: 600 }}>Treated → Control</span>
+                                        </div>
+                                        <div
+                                            style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+                                            onClick={() => setModalImage({ src: "/bio/phi/phi_epoch_100.png", alt: "Inverse Model Evaluation (Epoch 100)" })}
+                                        >
+                                            <img
+                                                src="/bio/phi/phi_epoch_100.png"
+                                                alt="Inverse Evaluation"
+                                                style={{ width: '100%', height: 'auto', display: 'block' }}
+                                            />
+                                        </div>
+                                        <p style={{ marginTop: '12px', fontSize: '13px', color: colors.textLight, lineHeight: 1.5 }}>
+                                            Restoration of the healthy phenotype (Control) from perturbed inputs, validating the reversibility of the learned mapping.
+                                        </p>
+                                        <div style={{ marginTop: '16px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                                            <video controls style={{ width: '100%', display: 'block' }}>
+                                                <source src="/bio/phi/phi_video_100.mp4" type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <div style={{ padding: '8px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid #e2e8f0', fontSize: '11px', color: colors.textLight, textAlign: 'center' }}>
+                                                Training Evolution (Epoch 1-100)
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '24px', textTransform: 'uppercase', color: colors.textLight }}>D. Comprehensive Benchmark Evaluation</h4>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px', marginBottom: '40px' }}>
+
+                                {/* Table 1: Forward Dynamics */}
+                                <div>
+                                    <h5 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: colors.text }}>Table 1. Forward Dynamics (Control → Treated)</h5>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f1f5f9' }}>
+                                                <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Samples</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>FID ↓</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>cFID ↓</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px' }}>1K</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center' }}>24.49</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center' }}>118.22</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ padding: '8px 12px' }}>5K</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.theta }}>11.94</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.theta }}>65.80</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Table 2: Inverse Dynamics */}
+                                <div>
+                                    <h5 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: colors.text }}>Table 2. Inverse Dynamics (Treated → Control)</h5>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f1f5f9' }}>
+                                                <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Samples</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>FID ↓</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>cFID ↓</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px' }}>1K</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center' }}>43.97</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center' }}>148.70</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ padding: '8px 12px' }}>5K</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.phi }}>35.50</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.phi }}>90.80</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
+
+                                {/* Table 3: Scaling Comparison */}
+                                <div>
+                                    <h5 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: colors.text }}>Table 3. Method Scaling Comparison</h5>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f1f5f9' }}>
+                                                <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Method</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>1K FID ↓</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>5K FID ↓</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px', color: colors.textLight }}>PhenDiff</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>71.3</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>49.5</td>
+                                            </tr>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px', color: colors.textLight }}>IMPA</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>52.4</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>33.7</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600, color: colors.primary }}>CellFlux </td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600, color: colors.primary }}>34.7</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600, color: colors.primary }}>18.7</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Table 4: Final Benchmark */}
+                                <div>
+                                    <h5 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: colors.text }}>Table 4. Final Benchmark Comparison (5K)</h5>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f1f5f9' }}>
+                                                <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Method</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>FID<sub style={{ fontSize: '10px' }}>o</sub> ↓</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>FID<sub style={{ fontSize: '10px' }}>c</sub> ↓</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px', color: colors.textLight }}>PhenDiff (MICCAI'24)</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>49.5</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>109.2</td>
+                                            </tr>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px', color: colors.textLight }}>IMPA (Nature Comm'25)</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>33.7</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.textLight }}>76.5</td>
+                                            </tr>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9', background: '#f0fdf4' }}>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600, color: colors.primary }}>CellFlux</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600, color: colors.primary }}>18.7</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600, color: colors.primary }}>56.8</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ padding: '8px 12px', color: colors.theta }}>Pretrained Conditional DDPM</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>11.94</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>65.80</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+                            <p style={{ marginTop: '24px', fontSize: '13px', color: colors.textLight, fontStyle: 'italic', textAlign: 'center' }}>
+                                <strong>Benchmark Note:</strong> "CellFlux" represents our proposed Flux.1-Dev based method using Flow Matching, which outperforms previous state-of-the-art methods (PhenDiff, IMPA) in both overall image quality (FID) and conditional alignment (cFID).
+                            </p>
                         </Section>
 
-                        {/* 7. Discussion */}
-                        <Section title="Discussion & Conclusion" number="7">
+                        {/* 7. Evolution Strategies (ES) Fine-tuning */}
+                        <Section title="Evolution Strategies (ES) Fine-tuning" number="7">
+
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                We implement an <strong>end-to-end pipeline</strong> for training two conditional diffusion models (Theta <Latex>{String.raw`$\theta$`}</Latex> and Phi <Latex>{String.raw`$\phi$`}</Latex>) using a hybrid of Evolution Strategies (ES) and supervised diffusion loss. This approach ensures cycle consistency and high-fidelity translation between Control and Treated states.
+                            </p>
+
+                            {/* Block Diagram */}
+                            <div style={{ marginBottom: '40px', textAlign: 'center', background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                                <div
+                                    style={{ borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', marginBottom: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                    onClick={() => setModalImage({ src: "/finetune/es/block.jpg", alt: "ES-DDMEC Training Pipeline" })}
+                                >
+                                    <img
+                                        src="/finetune/es/block.jpg"
+                                        alt="ES-DDMEC Pipeline"
+                                        style={{ width: '100%', maxHeight: '500px', objectFit: 'contain', display: 'block' }}
+                                    />
+                                </div>
+                                <p style={{ fontSize: '13px', color: colors.textLight, fontStyle: 'italic' }}>
+                                    <strong>Figure 7.1: End-to-End Training Pipeline.</strong> The system alternates between ES-based reward maximization (using the partner model as a critic) and supervised diffusion fine-tuning.
+                                </p>
+                            </div>
+
+                            {/* 7.1 Problem Statement */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>7.1 Problem Formulation</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    The goal is to learn a bidirectional generative translation between <strong>Control</strong> (DMSO) and <strong>Treated</strong> (Compound) cell states:
+                                </p>
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight }}>
+                                    <li style={{ marginBottom: '8px' }}><strong>Theta (<Latex>{String.raw`$\theta$`}</Latex>): Control <Latex>{String.raw`$\to$`}</Latex> Treated.</strong> Given a control image <Latex>{String.raw`$\mathbf{x}$`}</Latex> and chemical fingerprint <Latex>{String.raw`$c$`}</Latex>, generate the corresponding treated state.</li>
+                                    <li><strong>Phi (<Latex>{String.raw`$\phi$`}</Latex>): Treated <Latex>{String.raw`$\to$`}</Latex> Control.</strong> Given a treated image <Latex>{String.raw`$\mathbf{y}$`}</Latex> and fingerprint <Latex>{String.raw`$c$`}</Latex>, restore the healthy control state.</li>
+                                </ul>
+                            </div>
+
+                            {/* 7.2 Data Pipeline */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>7.2 Data Pipeline & Conditioning</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    We utilize a custom <code>BBBC021Dataset</code> and <code>PairedDataLoader</code> to ensure robust training:
+                                </p>
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight }}>
+                                    <li style={{ marginBottom: '8px' }}><strong>Batch Pairing:</strong> Every treated sample is paired with a random control image <em>from the same experimental batch</em> to prevent the model from learning batch artifacts instead of biological effects.</li>
+                                    <li style={{ marginBottom: '8px' }}><strong>Chemical Conditioning:</strong> 1024-bit Morgan Fingerprints are extracted using RDKit (radius=2) to deterministically represent molecular structure.</li>
+                                    <li><strong>Robust Loading:</strong> A fault-tolerant path resolver handles the complex directory structure of the BBBC021 dataset.</li>
+                                </ul>
+                            </div>
+
+                            {/* 7.3 Model Architecture */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>7.3 Architecture: Conditional Diffusion</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    We modify the standard UNet2DModel to support dual conditioning:
+                                </p>
+                                <ol style={{ listStyleType: 'decimal', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight }}>
+                                    <li style={{ marginBottom: '8px' }}><strong>Image Concatenation:</strong> The conditioning image (e.g., Control) is concatenated channel-wise with the noisy input <Latex>{String.raw`$\mathbf{x}_t$`}</Latex>, resulting in a 6-channel input. Weights for the new channels are zero-initialized ("conv surgery") to preserve pretrained knowledge.</li>
+                                    <li><strong>Fingerprint Embedding:</strong> The 1024-dim fingerprint is projected to the time-embedding dimension and injected via the <code>class_labels</code> mechanism, providing global semantic guidance.</li>
+                                </ol>
+                            </div>
+
+                            {/* 7.4 Reward Definition */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>7.4 Reward: Diffusion-based Likelihood (DDMEC)</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    Instead of a discriminator, we use the partner diffusion model as a critic. The reward is the approximate negative log-likelihood of the generated sample under the inverse model:
+                                </p>
+                                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '8px', marginBottom: '12px', textAlign: 'center', fontFamily: 'monospace', fontSize: '13px' }}>
+                                    Reward <Latex>{String.raw`$\approx -\log p_{\phi}(\text{Control} \mid \text{Generated Treated})$`}</Latex>
+                                </div>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                    This encourages <Latex>{String.raw`$\theta$`}</Latex> to generate treated cells that <Latex>{String.raw`$\phi$`}</Latex> confidently recognizes as mapping back to the control state, enforcing cycle consistency via likelihood maximization.
+                                </p>
+                            </div>
+
+                            {/* 7.5 The 4-Phase Loop */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>7.5 The 4-Phase Co-Evolution Loop</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                    Training alternates between gradient-free ES updates and supervised fine-tuning in a 4-step cycle:
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+                                    <div style={{ border: `1px solid ${colors.theta}`, borderRadius: '8px', padding: '16px', background: '#eff6ff' }}>
+                                        <strong style={{ color: colors.theta, display: 'block', marginBottom: '8px' }}>Phase A: ES Update <Latex>{String.raw`$\theta$`}</Latex> (using <Latex>{String.raw`$\phi$`}</Latex>)</strong>
+                                        <span style={{ fontSize: '13px', color: colors.textLight }}>
+                                            Generate candidate treated images. Update <Latex>{String.raw`$\theta$`}</Latex> to maximize their likelihood under <Latex>{String.raw`$\phi$`}</Latex>.
+                                        </span>
+                                    </div>
+                                    <div style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '16px', background: '#fff' }}>
+                                        <strong style={{ color: colors.text, display: 'block', marginBottom: '8px' }}>Phase B: Supervised Update <Latex>{String.raw`$\phi$`}</Latex></strong>
+                                        <span style={{ fontSize: '13px', color: colors.textLight }}>
+                                            Use <Latex>{String.raw`$\theta$`}</Latex>'s generated images as input. Train <Latex>{String.raw`$\phi$`}</Latex> to denoise them back to the real Control images (Standard DDPM Loss).
+                                        </span>
+                                    </div>
+                                    <div style={{ border: `1px solid ${colors.phi}`, borderRadius: '8px', padding: '16px', background: '#fef2f2' }}>
+                                        <strong style={{ color: colors.phi, display: 'block', marginBottom: '8px' }}>Phase C: ES Update <Latex>{String.raw`$\phi$`}</Latex> (using <Latex>{String.raw`$\theta$`}</Latex>)</strong>
+                                        <span style={{ fontSize: '13px', color: colors.textLight }}>
+                                            Generate candidate control images. Update <Latex>{String.raw`$\phi$`}</Latex> to maximize their likelihood under <Latex>{String.raw`$\theta$`}</Latex>.
+                                        </span>
+                                    </div>
+                                    <div style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '16px', background: '#fff' }}>
+                                        <strong style={{ color: colors.text, display: 'block', marginBottom: '8px' }}>Phase D: Supervised Update <Latex>{String.raw`$\theta$`}</Latex></strong>
+                                        <span style={{ fontSize: '13px', color: colors.textLight }}>
+                                            Use <Latex>{String.raw`$\phi$`}</Latex>'s generated images as input. Train <Latex>{String.raw`$\theta$`}</Latex> to denoise them back to the real Treated images.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </Section>
+
+
+                        {/* 8. PPO-DDMEC Fine-tuning */}
+                        <Section title="PPO-DDMEC Fine-tuning: Diffusion as Policy" number="8">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                While Evolution Strategies (ES) provides a gradient-free approach to optimization, <strong>Proximal Policy Optimization (PPO)</strong> allows us to treat the diffusion process as a stochastic policy and optimize it directly using reinforcement learning. This method, <strong>DDMEC-PPO</strong>, leverages the probability density function of the diffusion model to enforce cycle consistency through a rigorous likelihood-based reward.
+                            </p>
+
+                            {/* Block Diagram */}
+                            <div style={{ marginBottom: '40px', textAlign: 'center', background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                                <div
+                                    style={{ borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', marginBottom: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                    onClick={() => setModalImage({ src: "/finetune/ppo/block.jpg", alt: "PPO-DDMEC Training Pipeline" })}
+                                >
+                                    <img
+                                        src="/finetune/ppo/block.jpg"
+                                        alt="PPO-DDMEC Pipeline"
+                                        style={{ width: '100%', maxHeight: '500px', objectFit: 'contain', display: 'block' }}
+                                    />
+                                </div>
+                                <p style={{ fontSize: '13px', color: colors.textLight, fontStyle: 'italic' }}>
+                                    <strong>Figure 8.1: PPO-DDMEC Architecture.</strong> The diffusion sampling process is treated as a policy trajectory. We collect rollouts, compute log-probabilities, and update the model using the PPO clipped objective to maximize the cycle-consistency reward.
+                                </p>
+                            </div>
+
+                            {/* 8.1 Diffusion as Policy */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>8.1 Key Idea: Diffusion Models as Policies</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    In this framework, we view the iterative denoising process as a sequential decision-making problem (an MDP):
+                                </p>
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                    <li><strong>State <Latex>{String.raw`$s_t$`}</Latex>:</strong> The current noisy image <Latex>{String.raw`$\mathbf{x}_t$`}</Latex>.</li>
+                                    <li><strong>Action <Latex>{String.raw`$a_t$`}</Latex>:</strong> The sampled less-noisy image <Latex>{String.raw`$\mathbf{x}_{t-1}$`}</Latex>.</li>
+                                    <li><strong>Policy <Latex>{String.raw`$\pi_\theta(a_t|s_t)$`}</Latex>:</strong> The diffusion posterior <Latex>{String.raw`$p_\theta(\mathbf{x}_{t-1}|\mathbf{x}_t)$`}</Latex>, parameterized as a Gaussian <Latex>{String.raw`$\mathcal{N}(\mu_\theta(\mathbf{x}_t), \sigma_t^2\mathbf{I})$`}</Latex>.</li>
+                                </ul>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                    By computing the <strong>log-probability</strong> of each sampling step, we can apply standard RL algorithms like PPO to shift the distribution of generated images towards those that yield higher rewards.
+                                </p>
+                            </div>
+
+                            {/* 8.2 Reward Signal */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>8.2 The Reward: Likelihood-based Cycle Consistency</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    Crucially, we do not use a "black box" discriminator. Instead, we use the <strong>partner diffusion model</strong> as the critic. If we generate a Treated image <Latex>{String.raw`$\hat{y}$`}</Latex> from Control <Latex>{String.raw`$x$`}</Latex>, the reward depends on how likely it is to recover <Latex>{String.raw`$x$`}</Latex> using the inverse model <Latex>{String.raw`$\phi$`}</Latex>.
+                                </p>
+                                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '8px', marginBottom: '12px', textAlign: 'center', fontFamily: 'monospace', fontSize: '13px' }}>
+                                    Reward <Latex>{String.raw`$r \approx -\log p_{\phi}(\text{Control} \mid \text{Generated Treated})$`}</Latex>
+                                </div>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                    This reward is estimated via the <strong>diffusion training loss</strong> of the partner model (the "evidence lower bound" or ELBO proxy), ensuring that the generated images lie on the manifold learned by the inverse mapping.
+                                </p>
+                            </div>
+
+                            {/* 8.3 PPO Update */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>8.3 The PPO Update</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                    We update the model to maximize the expected reward while preventing it from deviating too far from the original pretrained distribution (to avoid "mode collapse" or generating nonsense that happens to satisfy the critic).
+                                </p>
+                                <div style={{ background: '#fff', border: '1px solid #e2e8f0', padding: '16px', borderRadius: '8px' }}>
+                                    <p style={{ marginBottom: '8px', fontWeight: 600, fontSize: '13px' }}>PPO Objective with "Pretraining Anchor":</p>
+                                    <div style={{ textAlign: 'center', margin: '12px 0', fontSize: '1.1em' }}>
+                                        <Latex>{String.raw`$L = \mathbb{E} [ \min(r_t A_t, \text{clip}(r_t, 1-\epsilon, 1+\epsilon)A_t) ] - \beta \cdot \|\epsilon_\theta - \epsilon_{\text{ref}}\|^2$`}</Latex>
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: colors.textLight }}>
+                                        where <Latex>{String.raw`$r_t$`}</Latex> is the probability ratio, <Latex>{String.raw`$A_t$`}</Latex> is the advantage, and the last term is an MSE penalty anchoring the model to a frozen reference UNet.
+                                    </p>
+                                </div>
+                            </div>
+                        </Section>
+
+                        {/* 9. Discussion */}
+                        <Section title="Discussion & Conclusion" number="9">
                             <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
                                 The optimization of FID validates the model's ability to learn the biological manifold.
                                 The Forward model (<Latex>{String.raw`$\theta$`}</Latex>) achieves a best FID of <strong>24.49</strong>, outperforming traditional unpaired mapping techniques by capturing global spatial context and drug-specific cytoskeletal responses.
