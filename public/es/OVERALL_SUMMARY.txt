@@ -1,0 +1,44 @@
+====================================================================================================
+COMPREHENSIVE ABLATION STUDY: OVERALL SUMMARY
+====================================================================================================
+Generated: 2026-01-25 05:17:55
+Output Directory: ablation_results\run_20260124_185514
+Dimensions: [2, 5, 10, 20, 30]
+====================================================================================================
+
+BEST CONFIGURATIONS PER DIMENSION (selected by composite score):
+----------------------------------------------------------------------------------------------------
+
+2D:
+  ES  - sigma=0.0010   lr=0.000200   score=3.3486     MAE=1.1330   Corr=0.0023   MI=0.4835     KLsum(per-dim)=0.0009    
+  PPO - (not run)
+  WINNER: ES
+
+5D:
+  ES  - sigma=0.0010   lr=0.000200   score=3.3201     MAE=1.1156   Corr=0.0076   MI=0.4861     KLsum(per-dim)=0.0012    
+  PPO - (not run)
+  WINNER: ES
+
+10D:
+  ES  - sigma=0.0010   lr=0.000100   score=3.3565     MAE=1.1216   Corr=-0.0007  MI=0.4669     KLsum(per-dim)=0.0012    
+  PPO - (not run)
+  WINNER: ES
+
+20D:
+  ES  - sigma=0.0010   lr=0.000100   score=3.3562     MAE=1.1198   Corr=0.0010   MI=0.2559     KLsum(per-dim)=0.0009    
+  PPO - (not run)
+  WINNER: ES
+
+30D:
+  ES  - sigma=0.0010   lr=0.000200   score=3.3631     MAE=1.1225   Corr=0.0031   MI=0.2541     KLsum(per-dim)=0.0016    
+  PPO - (not run)
+  WINNER: ES
+
+
+====================================================================================================
+OVERALL STATISTICS:
+====================================================================================================
+
+ES wins:  5
+PPO wins: 0
+Total dims evaluated: 5

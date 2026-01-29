@@ -1,0 +1,49 @@
+====================================================================================================
+COMPREHENSIVE ABLATION STUDY: OVERALL SUMMARY
+====================================================================================================
+Generated: 2026-01-26 11:51:28
+Output Directory: ablation_results\run_20260125_090837
+Dimensions: [1, 2, 5, 10, 20, 30]
+====================================================================================================
+
+BEST CONFIGURATIONS PER DIMENSION (selected by composite score):
+----------------------------------------------------------------------------------------------------
+
+1D:
+  ES  - (not run)
+  PPO - kl_w=3.0e-04  clip=0.02   lr=0.000010   score=3.2714     MAE=1.1250   Corr=0.0120   MI=0.4599     KLsum(per-dim)=0.0025    
+  WINNER: PPO
+
+2D:
+  ES  - (not run)
+  PPO - kl_w=3.0e-04  clip=0.05   lr=0.000050   score=3.3049     MAE=1.1174   Corr=0.0028   MI=0.4595     KLsum(per-dim)=0.0064    
+  WINNER: PPO
+
+5D:
+  ES  - (not run)
+  PPO - kl_w=3.0e-03  clip=0.10   lr=0.000010   score=3.3477     MAE=1.1221   Corr=0.0003   MI=0.4668     KLsum(per-dim)=0.0012    
+  WINNER: PPO
+
+10D:
+  ES  - (not run)
+  PPO - kl_w=3.0e-03  clip=0.02   lr=0.000010   score=3.3663     MAE=1.1253   Corr=0.0004   MI=0.4777     KLsum(per-dim)=0.0016    
+  WINNER: PPO
+
+20D:
+  ES  - (not run)
+  PPO - kl_w=1.0e-04  clip=0.02   lr=0.000010   score=3.3635     MAE=1.1224   Corr=0.0015   MI=0.2616     KLsum(per-dim)=0.0026    
+  WINNER: PPO
+
+30D:
+  ES  - (not run)
+  PPO - kl_w=1.0e-03  clip=0.10   lr=0.000020   score=3.3636     MAE=1.1209   Corr=-0.0008  MI=0.2564     KLsum(per-dim)=0.0082    
+  WINNER: PPO
+
+
+====================================================================================================
+OVERALL STATISTICS:
+====================================================================================================
+
+ES wins:  0
+PPO wins: 6
+Total dims evaluated: 6

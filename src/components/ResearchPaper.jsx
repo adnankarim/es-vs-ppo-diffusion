@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PPOComparison from './PPOComparison';
 import BiologicalExperiments from './BiologicalExperiments';
+import SyntheticExperiments from './SyntheticExperiments';
 
 const colors = {
   primary: '#0f766e',
@@ -86,13 +87,7 @@ const ResearchPaper = () => {
           {activeTab === 'biological' && <BiologicalExperiments />}
 
           {activeTab === 'synthetic' && (
-            <div style={{ padding: '64px', textAlign: 'center', color: colors.textLight }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>🧪</div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '16px' }}>Synthetic Experiments</h3>
-              <p style={{ maxWidth: '500px', margin: '0 auto', lineHeight: 1.6 }}>
-                This section is currently under development. It will contain results from controlled synthetic distribution matching experiments.
-              </p>
-            </div>
+            <SyntheticExperiments />
           )}
 
         </div>

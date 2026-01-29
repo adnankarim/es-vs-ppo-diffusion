@@ -4,22 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node node_modules/vite/bin/vite.js",
+    "dev": "node node_modules/vite/bin/vite.js --host",
     "build": "node node_modules/vite/bin/vite.js build",
     "preview": "node node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
+    "katex": "^0.16.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-latex-next": "^2.3.0",
-    "katex": "^0.16.9",
+    "react-latex-next": "^3.0.0",
     "recharts": "^2.15.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.2"
+    "vite": "^7.3.1"
   }
 }
-
