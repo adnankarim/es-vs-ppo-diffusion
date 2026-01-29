@@ -49,8 +49,7 @@ const ResearchPaper = () => {
           </p>
           <div style={{ marginTop: '32px', display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '14px', opacity: 0.85 }}>
             <span>📊 97,504 images</span>
-            <span>💊 113 compounds</span>
-            <span>🔬 26 MoA classes</span>
+            <span>💊 35 compounds</span>
           </div>
         </div>
       </header>
@@ -59,12 +58,12 @@ const ResearchPaper = () => {
 
         {/* Tab Navigation */}
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #cbd5e1', marginBottom: '0', paddingLeft: '8px' }}>
-          <TabButton
+          {/* <TabButton
             active={activeTab === 'ppo'}
             onClick={() => setActiveTab('ppo')}
           >
             PPO vs ES Comparison
-          </TabButton>
+          </TabButton> */}
           <TabButton
             active={activeTab === 'biological'}
             onClick={() => setActiveTab('biological')}
@@ -94,8 +93,8 @@ const ResearchPaper = () => {
 
         {/* Footer */}
         <footer style={{ textAlign: 'center', padding: '32px', color: colors.textLight, fontSize: '14px' }}>
-          <p><strong style={{ color: colors.text }}>Dataset:</strong> BBBC021 (97,504 images, 113 compounds)</p>
-          <p><strong style={{ color: colors.text }}>Splits:</strong> 74,090 train / 13,626 val / 9,788 test (batch-disjoint)</p>
+          <p><strong style={{ color: colors.text }}>Dataset:</strong> BBBC021 (97,504 images, 35 compounds)</p>
+          <p><strong style={{ color: colors.text }}>Splits:</strong> 87,716 train / 9,788 test (batch-disjoint)</p>
         </footer>
 
       </main>

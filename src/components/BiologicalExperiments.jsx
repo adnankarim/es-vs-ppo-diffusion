@@ -150,6 +150,33 @@ const BiologicalExperiments = () => {
                                 We utilize <strong>BBBC021</strong>, a foundational high-content microscopy dataset. Unlike standard classification benchmarks, it encodes a biological experiment where each image represents a single cell under specific chemical perturbation, dose, and batch conditions.
                             </p>
 
+
+                            {/* Visual Dataset Summary */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+                                <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', padding: '24px', borderRadius: '12px', border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                                    <h4 style={{ fontSize: '14px', color: '#1e40af', fontWeight: 600, marginBottom: '8px' }}>Total Single Cells</h4>
+                                    <p style={{ fontSize: '32px', fontWeight: 800, color: '#1e3a8a', margin: 0 }}>97,504</p>
+                                    <p style={{ fontSize: '12px', color: '#3b82f6', marginTop: '4px' }}>Across 35 Compounds</p>
+                                </div>
+                                <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                    <h4 style={{ fontSize: '13px', color: colors.textLight, fontWeight: 600, marginBottom: '16px', textTransform: 'uppercase' }}>Data Splits (Batch-Disjoint)</h4>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                                        <div style={{ width: '80px', fontSize: '13px', fontWeight: 600, color: colors.text }}>Train</div>
+                                        <div style={{ flex: 1, height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden', margin: '0 12px' }}>
+                                            <div style={{ width: '90%', height: '100%', background: colors.primary, borderRadius: '4px' }}></div>
+                                        </div>
+                                        <div style={{ width: '60px', textAlign: 'right', fontSize: '13px', color: colors.textLight }}>87,716</div>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <div style={{ width: '80px', fontSize: '13px', fontWeight: 600, color: colors.text }}>Test</div>
+                                        <div style={{ flex: 1, height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden', margin: '0 12px' }}>
+                                            <div style={{ width: '10%', height: '100%', background: colors.phi, borderRadius: '4px' }}></div>
+                                        </div>
+                                        <div style={{ width: '60px', textAlign: 'right', fontSize: '13px', color: colors.textLight }}>9,788</div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div style={{ marginBottom: '40px' }}>
                                 <h4 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: colors.text }}>1. Experimental Structure</h4>
                                 <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
@@ -159,9 +186,6 @@ const BiologicalExperiments = () => {
 
                             <div style={{ marginBottom: '40px' }}>
                                 <h4 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2. Scale & Integrity</h4>
-                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
-                                    The dataset contains <strong>97,504</strong> single-cell images across <strong>35 compounds</strong> (including DMSO) and <strong>46 batches</strong>.
-                                </p>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', marginBottom: '16px' }}>
                                     <div style={{ textAlign: 'center' }}>
                                         <img
