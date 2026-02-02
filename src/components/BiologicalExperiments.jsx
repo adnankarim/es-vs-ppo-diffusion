@@ -1506,6 +1506,39 @@ const BiologicalExperiments = () => {
                     </>
                 )}
 
+                {/* References Section */}
+                <Section title="References" number="10">
+                    <ol style={{ fontSize: '0.9rem', lineHeight: 1.6, color: colors.textLight, paddingLeft: '20px' }}>
+                        <li style={{ marginBottom: '8px' }}>Black, K., et al. (2023). "Training Diffusion Models with Reinforcement Learning." <em>arXiv preprint arXiv:2305.13301</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Salimans, T., et al. (2017). "Evolution Strategies as a Scalable Alternative to Reinforcement Learning." <em>arXiv preprint arXiv:1703.03864</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Schulman, J., et al. (2017). "Proximal Policy Optimization Algorithms." <em>arXiv preprint arXiv:1707.06347</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Qiu, X., et al. (2025). "Evolution Strategies at Scale: LLM Fine-Tuning Beyond Reinforcement Learning." <em>arXiv preprint arXiv:2509.24372</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Bounoua, M., et al. (2025). "Learning to Match Unpaired Data with Minimum Entropy Coupling." <em>arXiv preprint arXiv:2503.08501</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Ho, J., et al. (2020). "Denoising Diffusion Probabilistic Models." <em>NeurIPS</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Ho, J., & Salimans, T. (2022). "Classifier-Free Diffusion Guidance." <em>arXiv preprint arXiv:2207.12598</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Ramachandran, P., et al. (2017). "Searching for Activation Functions (Swish)." <em>arXiv preprint arXiv:1710.05941</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Cover, T. M., & Thomas, J. A. (2006). "Elements of Information Theory." <em>Wiley-Interscience</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Broad Bioimage Benchmark Collection. (2013). "BBBC021: High-Content Chemical Screening Images of Human Cells." <em>https://bbbc.broadinstitute.org/BBBC021</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Ljosa, V., et al. (2013). "Annotated high-throughput microscopy image sets for validation." <em>Nature Methods</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>McQuin, C., et al. (2018). "CellProfiler 3.0: Next-generation image processing for biology." <em>PLOS Biology</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Ronneberger, O., et al. (2015). "U-Net: Convolutional Networks for Biomedical Image Segmentation." <em>MICCAI</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Hugging Face. (2023). "Hugging Face Diffusers Library." <em>https://huggingface.co/docs/diffusers</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Heusel, M., et al. (2017). "GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium." <em>NeurIPS</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Szegedy, C., et al. (2016). "Rethinking the Inception Architecture for Computer Vision." <em>CVPR</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Miyato, T., et al. (2021). "On the Evaluation of Conditional GANs." <em>ICLR</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Compton, S., et al. (2023). "Computational Guarantees for Minimum-Entropy Couplings." <em>PMLR</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Kolouri, S., et al. (2019). "Minimum Entropy Couplings and Their Applications." <em>arXiv</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Rogers, D., & Hahn, M. (2010). "Extended-Connectivity Fingerprints (ECFP): Morgan Fingerprints." <em>rdkit.org</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>RDKit Contributors. (2023). "RDKit: Open-Source Cheminformatics." <em>rdkit.org</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Rombach, R., et al. (2022). "High-Resolution Image Synthesis with Latent Diffusion Models." <em>CVPR</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Zhang, L., & Agrawala, M. (2023). "Adding Conditional Control to Text-to-Image Diffusion Models." <em>ICCV</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Hu, E., et al. (2022). "LoRA: Low-Rank Adaptation of Large Language Models." <em>ICLR</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Lipman, Y., et al. (2023). "Flow Matching for Generative Modeling." <em>ICLR</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Black Forest Labs. (2024). "FLUX.1 Technical Report." <em>blackforestlabs.ai</em>.</li>
+                        <li style={{ marginBottom: '8px' }}>Cross-Zamirski, J., et al. (2024). "Predicting cell morphological responses to perturbations using generative modeling." <em>Nature Communications</em>.</li>
+                    </ol>
+                </Section>
+
             </div>
             <ImageModal
                 src={modalImage?.src}

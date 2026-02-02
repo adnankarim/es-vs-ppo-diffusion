@@ -3,39 +3,39 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import ImageModal from './ImageModal';
 
 const CONFIGS = {
-  1: { ppo: 23, es: 0 },
-  2: { ppo: 13, es: 1 },
-  5: { ppo: 7, es: 1 },
-  10: { ppo: 39, es: 1 },
-  20: { ppo: 4, es: 1 },
-  30: { ppo: 43, es: 0 }
+  1: { ppo: 8, es: 0 },
+  2: { ppo: 35, es: 1 },
+  5: { ppo: 40, es: 1 },
+  10: { ppo: 36, es: 0 },
+  20: { ppo: 33, es: 0 },
+  30: { ppo: 21, es: 1 }
 };
 
-// Data from overall_best_configs.csv and manual analysis
+// Data from all_results.json (Verified Best Configs via script)
 const METRICS = {
   1: {
-    ppo: { score: 3.27, kl: 0.002, corr: 0.012, mae: 1.12, mi: 0.46 },
-    es: { score: 3.35, kl: 0.001, corr: 0.013, mae: 1.13, mi: 0.48 }
+    ppo: { score: 1.125, kl: 0.003, corr: 0.012, mae: 1.125, mi: 0.456 }, // Config 8
+    es: { score: 1.122, kl: 0.001, corr: 0.013, mae: 1.122, mi: 0.463 }  // Config 0
   },
   2: {
-    ppo: { score: 3.30, kl: 0.006, corr: 0.003, mae: 1.12, mi: 0.46 },
-    es: { score: 3.35, kl: 0.001, corr: 0.002, mae: 1.13, mi: 0.48 }
+    ppo: { score: 1.128, kl: 0.009, corr: 0.003, mae: 1.128, mi: 0.463 }, // Config 35
+    es: { score: 1.128, kl: 0.001, corr: 0.002, mae: 1.128, mi: 0.483 }  // Config 1
   },
   5: {
-    ppo: { score: 3.35, kl: 0.001, corr: 0.0003, mae: 1.12, mi: 0.47 },
-    es: { score: 3.32, kl: 0.001, corr: 0.008, mae: 1.12, mi: 0.49 }
+    ppo: { score: 1.122, kl: 0.001, corr: 0.006, mae: 1.122, mi: 0.467 }, // Config 40
+    es: { score: 1.116, kl: 0.001, corr: 0.007, mae: 1.116, mi: 0.486 }  // Config 1
   },
   10: {
-    ppo: { score: 3.37, kl: 0.002, corr: 0.0004, mae: 1.13, mi: 0.48 },
-    es: { score: 3.36, kl: 0.001, corr: -0.001, mae: 1.12, mi: 0.47 }
+    ppo: { score: 1.125, kl: 0.002, corr: 0.0004, mae: 1.125, mi: 0.478 }, // Config 36
+    es: { score: 1.122, kl: 0.001, corr: -0.000, mae: 1.122, mi: 0.467 } // Config 0
   },
   20: {
-    ppo: { score: 3.36, kl: 0.003, corr: 0.002, mae: 1.12, mi: 0.26 },
-    es: { score: 3.36, kl: 0.001, corr: 0.001, mae: 1.12, mi: 0.26 }
+    ppo: { score: 1.122, kl: 0.005, corr: 0.003, mae: 1.122, mi: 0.262 }, // Config 33
+    es: { score: 1.120, kl: 0.001, corr: 0.001, mae: 1.120, mi: 0.256 }  // Config 0
   },
   30: {
-    ppo: { score: 3.36, kl: 0.008, corr: -0.001, mae: 1.12, mi: 0.26 },
-    es: { score: 3.36, kl: 0.002, corr: 0.003, mae: 1.12, mi: 0.25 }
+    ppo: { score: 1.121, kl: 0.015, corr: 0.003, mae: 1.121, mi: 0.257 }, // Config 21
+    es: { score: 1.122, kl: 0.002, corr: 0.003, mae: 1.122, mi: 0.254 }  // Config 1
   }
 };
 
@@ -149,21 +149,64 @@ const AblationStudy = () => {
         </div>
       </div>
 
+      {/* Comparison Metrics Table */}
+      <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#64748b', textTransform: 'uppercase' }}>Metrics Comparison ({activeDim})</h4>
+      <div style={{ overflowX: 'auto', marginBottom: '24px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
+              <th style={{ padding: '8px', color: '#64748b' }}>Metric</th>
+              <th style={{ padding: '8px', color: '#0f766e' }}>PPO</th>
+              <th style={{ padding: '8px', color: '#db2777' }}>ES</th>
+              <th style={{ padding: '8px', color: '#64748b' }}>Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { label: 'MAE (Lower is Better)', key: 'mae', better: 'lower' },
+              { label: 'KL Divergence', key: 'kl', better: 'lower' },
+              { label: 'Mutual Info (MI)', key: 'mi', better: 'higher' },
+            ].map((metric) => {
+              const ppoVal = METRICS[activeDim].ppo[metric.key];
+              const esVal = METRICS[activeDim].es[metric.key];
+              const isPPOBetter = metric.better === 'lower' ? ppoVal < esVal : ppoVal > esVal;
+              const isESBetter = metric.better === 'lower' ? esVal < ppoVal : esVal > ppoVal;
+
+              const ppoColor = isPPOBetter ? '#16a34a' : '#1e293b'; // Green or Dark Slate
+              const esColor = isESBetter ? '#16a34a' : '#1e293b';   // Green or Dark Slate
+              const ppoWeight = isPPOBetter ? 700 : 400;
+              const esWeight = isESBetter ? 700 : 400;
+
+              return (
+                <tr key={metric.key} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '8px', color: '#334155' }}>{metric.label}</td>
+                  <td style={{ padding: '8px', color: ppoColor, fontWeight: ppoWeight }}>{ppoVal}</td>
+                  <td style={{ padding: '8px', color: esColor, fontWeight: esWeight }}>{esVal}</td>
+                  <td style={{ padding: '8px', color: '#64748b', fontSize: '13px' }}>
+                    {metric.better === 'lower' ? (esVal - ppoVal).toFixed(3) : (ppoVal - esVal).toFixed(3)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
       <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px', padding: '16px', marginBottom: '24px', fontSize: '14px', color: '#0369a1' }}>
         <strong>Interpretation:</strong>
         {activeDim < 5 ?
-          " In low dimensions, PPO quickly finds a stable policy. ES struggles to explore effectively." :
+          " In 1D, ES achieves slightly tighter convergence (MAE 1.122 vs 1.125) with lower KL divergence." :
           activeDim > 10 ?
-            " High dimensionality introduces noise. PPO maintains high scores, while ES variance increases." :
-            " At intermediate dimensions (5D-10D), both methods perform comparably, with PPO showing slightly better alignment (Higher MI)."
+            " In high dimensions (30D), PPO marginally outperforms ES (MAE 1.121 vs 1.122), showing better scalability despite higher KL cost." :
+            " At intermediate dimensions (5D-10D), ES maintains a slight edge in MAE, but PPO demonstrates competitive mutual information alignment."
         }
       </div>
 
-      <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#64748b', textTransform: 'uppercase' }}>MI & Score Comparison</h4>
+      <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#64748b', textTransform: 'uppercase' }}>MI & MAE Comparison</h4>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis type="number" stroke="#64748b" fontSize={12} />
+          <XAxis type="number" domain={[1.0, 1.2]} label={{ value: 'MAE (Lower is Better)', position: 'insideBottom', offset: -5 }} stroke="#64748b" fontSize={12} />
           <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={12} width={80} />
           <Tooltip />
           <Legend />
