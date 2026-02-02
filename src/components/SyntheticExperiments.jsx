@@ -60,38 +60,143 @@ const SyntheticExperiments = () => {
                     Methodology
                 </h2>
 
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: '24px', marginBottom: '12px', color: colors.text }}>2.1 The Coupling Task</h3>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: '24px', marginBottom: '12px', color: colors.text }}>2.1 Problem & Formalism</h3>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
-                    We define a standardized task to evaluate the model's ability to learn conditional dependencies. The goal is to generate pairs of variables <Latex>{`$(\\mathbf{x}_1, \\mathbf{x}_2)$`}</Latex> where each marginal follows a specific Gaussian distribution, but they are strongly coupled.
+                    <strong>Problem Definition:</strong> The objective is to learn a joint distribution <Latex>{`$p(\\mathbf{x}_1, \\mathbf{x}_2)$`}</Latex> given only unpaired marginal samples from datasets <Latex>{`$\\mathcal{D}_1$`}</Latex> and <Latex>{`$\\mathcal{D}_2$`}</Latex>. The method approaches this as learning two conditional diffusion models (couplings), <Latex>{`$p_\\theta(\\mathbf{x}_1|\\mathbf{x}_2)$`}</Latex> and <Latex>{`$p_\\phi(\\mathbf{x}_2|\\mathbf{x}_1)$`}</Latex>, that are mutually consistent and maximize mutual information.
                 </p>
-                <ul style={{ lineHeight: 1.8, marginBottom: '16px', listStyleType: 'disc', paddingLeft: '24px', color: colors.textLight }}>
-                    <li style={{ marginBottom: '8px' }}><strong>Variable 1:</strong> <Latex>{`$\\mathbf{x}_1 \\sim \\mathcal{N}(2, 0.99)$`}</Latex></li>
-                    <li style={{ marginBottom: '8px' }}><strong>Variable 2:</strong> <Latex>{`$\\mathbf{x}_2 \\sim \\mathcal{N}(10, 1.0)$`}</Latex></li>
-                    <li style={{ marginBottom: '8px' }}><strong>Coupling Goal:</strong> <Latex>{`$\\mathbf{x}_2 \\approx \\mathbf{x}_1 + 8$`}</Latex></li>
-                </ul>
-                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
-                    We define the reward function <Latex>{`$R(\\mathbf{x}_1, \\mathbf{x}_2)$`}</Latex> as the negative Mean Absolute Error (MAE) between the generated samples and the target linear relationship. Theoretically, a perfect model would achieve a high Mutual Information (MI) while maintaining the original marginal entropies.
-                </p>
+                <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                    <ul style={{ margin: 0, paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight }}>
+                        <li style={{ marginBottom: '8px' }}><strong>Spaces:</strong> Input/Output Space <Latex>{`$\\mathcal{X} = \\mathbb{R}^d$`}</Latex>, where <Latex>{`$d \\in \\{1, 2, 5, 10, 20, 30\\}$`}</Latex>. Time Space <Latex>{`$\\mathcal{T} = [0, 1]$`}</Latex>.</li>
+                        <li><strong>Task Instantiation:</strong> We validate on a synthetic Gaussian task where <Latex>{`$\\mathbf{x}_1 \\sim \\mathcal{N}(2, 0.99)$`}</Latex> and <Latex>{`$\\mathbf{x}_2 \\sim \\mathcal{N}(10, 1.0)$`}</Latex>, aiming to learn the coupling <Latex>{`$\\mathbf{x}_2 \\approx \\mathbf{x}_1 + 8$`}</Latex>.</li>
+                    </ul>
+                </div>
 
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: '24px', marginBottom: '12px', color: colors.text }}>2.2 Model Architecture</h3>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
-                    We employ a <strong>Multi-Dimensional Denoising Diffusion Probabilistic Model (DDPM)</strong>. The noise prediction network <Latex>{`$\\epsilon_\\theta(\\mathbf{x}_t, t)$`}</Latex> is parameterized by a Multi-Layer Perceptron (MLP) with the following specifications:
+                    The backbone for the Actor, Anchor, and Scorer is a <strong>Conditional Multi-Dimensional MLP</strong>. Let <Latex>{`$\\mathbf{x}_t \\in \\mathbb{R}^d$`}</Latex>, <Latex>{`$\\mathbf{c} \\in \\mathbb{R}^d$`}</Latex> (condition), and <Latex>{`$t \\in [0, 1]$`}</Latex>. The network <Latex>{`$\\epsilon_\\theta(\\mathbf{x}_t, t, \\mathbf{c})$`}</Latex> approximates the noise vector.
                 </p>
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '8px', fontSize: '0.9rem', fontFamily: "'IBM Plex Mono', monospace", marginBottom: '16px', color: colors.text }}>
-                    - Hidden Dimensions: 128<br />
-                    - Time Embedding Dimension: 64<br />
-                    - Activation: SiLU (Swish)<br />
-                    - Timesteps: 100
+                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '16px', color: colors.text }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 600 }}>Layer Specification:</p>
+                    <ul style={{ margin: 0, paddingLeft: '24px', listStyleType: 'decimal', fontFamily: "'IBM Plex Mono', monospace" }}>
+                        <li><strong>Time Embedding:</strong> Gaussian Fourier projection <Latex>{`$\\text{Embed}(t) = [\\sin(2\\pi t f), \\cos(2\\pi t f)]$`}</Latex>.</li>
+                        <li><strong>Input Projection:</strong> <Latex>{`$h_0 = \\text{Linear}(\\text{Concat}(\\mathbf{x}_t, \\mathbf{c}, \\text{Embed}(t)))$`}</Latex>.</li>
+                        <li><strong>Residual Blocks:</strong> 3x Blocks with SiLU (Swish) activation and LayerNorm.</li>
+                        <li><strong>Output:</strong> <Latex>{`$\\epsilon = \\text{Linear}(h_3)$`}</Latex>.</li>
+                    </ul>
                 </div>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
-                    The pre-trained model generates independent samples. The fine-tuning phase updates the model weights to maximize the coupling reward.
+                    <strong>Probabilistic Transition (Policy):</strong> The policy <Latex>{`$\\pi_\\theta(\\mathbf{x}_{t-1}|\\mathbf{x}_t, \\mathbf{c})$`}</Latex> is modeled as a diagonal Gaussian <Latex>{`$\\mathcal{N}(\\mu_\\theta(\\mathbf{x}_t, t, \\mathbf{c}), \\sigma_t^2 \\mathbf{I})$`}</Latex>, where <Latex>{`$\\mu_\\theta$`}</Latex> is derived from <Latex>{`$\\epsilon_\\theta$`}</Latex> using the standard DDPM posterior mean formula.
                 </p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: '24px', marginBottom: '12px', color: colors.text }}>2.3 DDMEC Mathematical Framework</h3>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    The <strong>Denoising Diffusion with Minimum Entropy Coupling (DDMEC)</strong> framework treats the reverse diffusion process as a trainable policy. We formalize the problem as maximizing the mutual information between two marginal spaces <Latex>{`$\\mathcal{X}_1$`}</Latex> and <Latex>{`$\\mathcal{X}_2$`}</Latex> using a specular reinforcement learning setup.
+                </p>
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px', color: colors.text, marginTop: '16px' }}>Objective Function</h4>
+                <p style={{ lineHeight: 1.8, marginBottom: '12px', color: colors.textLight }}>
+                    The global objective <Latex>{`$J(\\theta)$`}</Latex> maximizes a contrastive reward while constrained by a "trust region" relative to a frozen unconditional anchor model:
+                </p>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$J(\\theta) = \\mathbb{E}_{\\tau \\sim \\pi_\\theta} [ R(\\tau) - \\beta \\cdot D_{KL}(\\pi_\\theta(\\mathbf{a}_t|\\mathbf{s}_t) || \\pi_{anc}(\\mathbf{a}_t|\\mathbf{s}_t)) ]$`}</Latex>
+                </div>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    Where <Latex>{`$\\pi_{anc}$`}</Latex> is the frozen pre-trained unconditional DDPM (ensuring marginal preservation), and <Latex>{`$R(\\tau)$`}</Latex> is the reward provided by the specular scorer model.
+                </p>
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '8px', color: colors.text }}>Algorithm: Specular Alternating Optimization</h4>
+                <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', fontFamily: 'monospace', fontSize: '0.9rem', marginBottom: '16px' }}>
+                    <p style={{ margin: 0, marginBottom: '8px', color: '#0f766e', fontWeight: 600 }}>Require: Unpaired datasets D1, D2</p>
+                    <p style={{ margin: 0 }}><strong>Phase A:</strong> Train <Latex>{`$\\pi_\\theta(\\mathbf{x}_1|\\mathbf{x}_2)$`}</Latex> using <Latex>{`$\\pi_\\phi$`}</Latex> as Scorer</p>
+                    <p style={{ margin: 0, paddingLeft: '16px', color: colors.textLight }}>1. Rollout <Latex>{`$\\mathbf{x}_1^g \\sim \\pi_\\theta(\\cdot|\\mathbf{x}_2)$`}</Latex></p>
+                    <p style={{ margin: 0, paddingLeft: '16px', color: colors.textLight }}>2. Compute Reward <Latex>{`$R \\approx -\\log p_\\phi(\\mathbf{x}_2|\\mathbf{x}_1^g)$`}</Latex></p>
+                    <p style={{ margin: 0, paddingLeft: '16px', color: colors.textLight }}>3. Update <Latex>{`$\\theta$`}</Latex> via PPO or ES</p>
+                    <br />
+                    <p style={{ margin: 0 }}><strong>Phase B:</strong> Train <Latex>{`$\\pi_\\phi(\\mathbf{x}_2|\\mathbf{x}_1)$`}</Latex> using <Latex>{`$\\pi_\\theta$`}</Latex> as Scorer</p>
+                    <p style={{ margin: 0, paddingLeft: '16px', color: colors.textLight }}>4. Symmetric update for <Latex>{`$\\phi$`}</Latex></p>
+                </div>
             </section>
 
-            {/* 3. Pretraining Validation (NEW) */}
+            {/* 3. Algorithms & Optimization */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
                     <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>3</span>
+                    Algorithms & Optimization
+                </h2>
+                <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
+                    The study compares two optimization methods for maximizing <Latex>{`$J(\\theta)$`}</Latex>: <strong>Evolution Strategies (ES)</strong> and <strong>Proximal Policy Optimization (PPO)</strong>.
+                </p>
+
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>3.1 The Reward Signal (Specular Contrastive Reward)</h3>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    The reward is estimated via a frozen "Scorer" model (the dual conditional model).
+                </p>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$R(\\mathbf{x}_1, \\mathbf{x}_2) = \\log \\frac{p_\\phi(\\mathbf{x}_2|\\mathbf{x}_1)}{p(\\mathbf{x}_2)}$`}</Latex>
+                </div>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    Practically approximated via Denoising MSE (a proxy for log-likelihood):
+                </p>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$R \\approx - || \\epsilon_\\phi(\\mathbf{x}_t, t, \\mathbf{x}_1) - \\epsilon ||^2$`}</Latex>
+                </div>
+
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: '24px', marginBottom: '12px', color: colors.text }}>3.2 Proximal Policy Optimization (PPO)</h3>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    PPO optimizes the surrogate objective with clipped importance ratios. Let <Latex>{`$r_t(\\theta) = \\frac{\\pi_\\theta(\\mathbf{a}_t|\\mathbf{s}_t)}{\\pi_{\\theta_{old}}(\\mathbf{a}_t|\\mathbf{s}_t)}$`}</Latex>.
+                </p>
+                <ul style={{ lineHeight: 1.8, listStyleType: 'disc', paddingLeft: '24px', color: colors.textLight }}>
+                    <li style={{ marginBottom: '8px' }}><strong>Gradient:</strong> Standard Autograd through the surrogate loss.</li>
+                    <li><strong>KL Penalty:</strong> Computed analytically between two Gaussians (Actor vs. Anchor).</li>
+                </ul>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$D_{KL}(\\mathcal{N}_1 || \\mathcal{N}_2) = \\log \\frac{\\sigma_2}{\\sigma_1} + \\frac{\\sigma_1^2 + (\\mu_1 - \\mu_2)^2}{2\\sigma_2^2} - \\frac{1}{2}$`}</Latex>
+                </div>
+
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: '24px', marginBottom: '12px', color: colors.text }}>3.3 Evolution Strategies (ES)</h3>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    ES optimizes using a finite difference approximation of the gradient on the population fitness.
+                </p>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$\\nabla_\\theta J \\approx \\frac{1}{n\\sigma} \\sum_{i=1}^n F(\\theta + \\sigma \\epsilon_i) \\epsilon_i$`}</Latex>
+                </div>
+                <ul style={{ lineHeight: 1.8, listStyleType: 'disc', paddingLeft: '24px', color: colors.textLight }}>
+                    <li style={{ marginBottom: '8px' }}><strong>Antithetic Sampling:</strong> Uses pairs <Latex>{`$\\epsilon, -\\epsilon$`}</Latex> for variance reduction.</li>
+                    <li style={{ marginBottom: '8px' }}><strong>Update:</strong> <Latex>{`$\\theta_{t+1} \\leftarrow \\theta_t + \\alpha \\cdot \\text{Adam}(\\nabla_\\theta J)$`}</Latex>.</li>
+                    <li><strong>Fitness <Latex>{`$F(\\theta)$`}</Latex>:</strong> <Latex>{`$R(\\tau) - \\beta D_{KL}$`}</Latex>. Note that ES optimizes the exact same objective as PPO, including the KL constraint computed on the rollout states.</li>
+                </ul>
+            </section>
+
+            {/* 4. Data & Preprocessing */}
+            <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>4</span>
+                    Data & Preprocessing
+                </h2>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    <strong>Dataset Definition:</strong> Synthetic Gaussian data designed to test coupling capabilities across dimensions.
+                </p>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$\\mathbf{x}_1 \\sim \\mathcal{N}(\\mu_1 \\cdot \\mathbf{1}_d, \\Sigma_1), \\quad \\mathbf{x}_2 \\sim \\mathcal{N}(\\mu_2 \\cdot \\mathbf{1}_d, \\Sigma_2)$`}</Latex>
+                </div>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    Resulting Marginal: <Latex>{`$\\mathcal{D}_1 \\perp \\mathcal{D}_2$`}</Latex>.
+                </p>
+
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    <strong>Normalization:</strong> Data is normalized to standard normal before input to the network:
+                </p>
+                <div style={{ textAlign: 'center', margin: '16px 0', fontSize: '1.1em' }}>
+                    <Latex>{`$\\tilde{\\mathbf{x}} = \\frac{\\mathbf{x} - \\mu_{train}}{\\sigma_{train}}$`}</Latex>
+                </div>
+                <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
+                    (Though the code implies learning happens in raw space in some sections, normalization statistics are tracked).
+                </p>
+            </section>
+
+            {/* 5. Pretraining Validation */}
+            <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>5</span>
                     Pretraining Validation
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
@@ -133,10 +238,63 @@ const SyntheticExperiments = () => {
                 </div>
             </section>
 
-            {/* 4. Experimental Setup */}
+            {/* 6. Experiments & Metrics */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>4</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>6</span>
+                    Experiments & Metrics
+                </h2>
+                <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
+                    Models are evaluated on a held-out frozen test set of size <Latex>{`$N_{test} = 10,000$`}</Latex>.
+                </p>
+
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>Evaluation Metrics:</h3>
+                <ul style={{ lineHeight: 1.8, listStyleType: 'disc', paddingLeft: '24px', color: colors.textLight }}>
+                    <li style={{ marginBottom: '12px' }}>
+                        <strong>Mutual Information (MI):</strong> Estimated via histogram binning for <Latex>{`$d=1,2$`}</Latex> and per-dimension averaging for <Latex>{`$d>2$`}</Latex>.
+                        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+                            <Latex>{`$I(X;Y) = \\sum_{x,y} p(x,y) \\log \\frac{p(x,y)}{p(x)p(y)}$`}</Latex>
+                        </div>
+                    </li>
+                    <li style={{ marginBottom: '12px' }}>
+                        <strong>Robust Entropy:</strong> Computed on dynamic histograms (robust to outliers).
+                        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+                            <Latex>{`$H(X) = - \\sum p(x) \\log p(x)$`}</Latex>
+                        </div>
+                    </li>
+                    <li style={{ marginBottom: '12px' }}>
+                        <strong>KL Divergence (Marginal Quality):</strong> Approximated via Gaussian assumptions on the generated marginals <Latex>{`$Q$`}</Latex> vs ground truth <Latex>{`$P$`}</Latex>.
+                        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+                            <Latex>{`$D_{KL}(P || Q)$`}</Latex>
+                        </div>
+                    </li>
+                    <li style={{ marginBottom: '12px' }}>
+                        <strong>Mean Absolute Error (MAE):</strong> Measures coupling accuracy between generated <Latex>{`$\\hat{\\mathbf{x}}_2$`}</Latex> and target manifold.
+                        <div style={{ margin: '8px 0', textAlign: 'center' }}>
+                            <Latex>{`$\\text{MAE} = \\frac{1}{d} \\sum |\\hat{\\mathbf{x}}_2 - (\\mathbf{x}_1 + 8)|$`}</Latex>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            {/* 7. Theoretical Insights & Limitations */}
+            <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>7</span>
+                    Theoretical Insights & Limitations
+                </h2>
+                <ul style={{ lineHeight: 1.8, listStyleType: 'disc', paddingLeft: '24px', color: colors.textLight }}>
+                    <li style={{ marginBottom: '12px' }}><strong>Assumption:</strong> The method assumes that consistency between two conditional distributions (<Latex>{`$p(\\mathbf{x}_1|\\mathbf{x}_2)$`}</Latex> and <Latex>{`$p(\\mathbf{x}_2|\\mathbf{x}_1)$`}</Latex>) combined with marginal constraints (<Latex>{`$p(\\mathbf{x}_1), p(\\mathbf{x}_2)$`}</Latex>) is sufficient to recover the true joint coupling.</li>
+                    <li style={{ marginBottom: '12px' }}><strong>Bias:</strong> The "Anchor" model introduces a strong bias towards the original marginals. If the Anchor is weak, the conditional generation will degrade (mode collapse or hallucination).</li>
+                    <li style={{ marginBottom: '12px' }}><strong>Scorer Limitation:</strong> The reward depends on the Scorer's ability to denoise. If the Scorer is poor, the reward signal is noisy, leading to instability (PPO) or random walks (ES).</li>
+                    <li style={{ marginBottom: '12px' }}><strong>Dimensionality:</strong> As <Latex>{`$d \\to \\infty$`}</Latex>, histogram-based MI estimation becomes a lower-bound approximation (sum of marginals).</li>
+                </ul>
+            </section>
+
+            {/* 8. Experimental Setup */}
+            <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>8</span>
                     Experimental Setup
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
@@ -169,7 +327,7 @@ const SyntheticExperiments = () => {
             {/* 5. Results (Embed AblationStudy) */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>5</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>9</span>
                     Results
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
@@ -214,7 +372,7 @@ const SyntheticExperiments = () => {
             {/* 6. Hyperparameter Sensitivity (NEW) */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>6</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>10</span>
                     Hyperparameter Sensitivity Analysis
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '24px', color: colors.textLight }}>
@@ -266,7 +424,7 @@ const SyntheticExperiments = () => {
             {/* 7. Discussion */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>7</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>11</span>
                     Discussion
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
@@ -280,7 +438,7 @@ const SyntheticExperiments = () => {
             {/* 8. Conclusion */}
             <section style={{ background: 'white', borderRadius: '16px', padding: '32px', marginBottom: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                 <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '24px', color: colors.text }}>
-                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>8</span>
+                    <span style={{ background: colors.primary, color: 'white', width: '36px', height: '36px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', fontSize: '16px' }}>12</span>
                     Conclusion
                 </h2>
                 <p style={{ lineHeight: 1.8, marginBottom: '16px', color: colors.textLight }}>
