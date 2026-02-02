@@ -81,6 +81,9 @@ const BiologicalExperiments = () => {
                     <SubTabButton active={activeSubTab === 'ddpm'} onClick={() => setActiveSubTab('ddpm')}>
                         DDPM & MEC
                     </SubTabButton>
+                    <SubTabButton active={activeSubTab === 'uncond'} onClick={() => setActiveSubTab('uncond')}>
+                        Uncond DDPM & PPO
+                    </SubTabButton>
                     <SubTabButton active={activeSubTab === 'flux'} onClick={() => setActiveSubTab('flux')}>
                         Flux Matching
                     </SubTabButton>
@@ -488,7 +491,7 @@ const BiologicalExperiments = () => {
                                             <tr>
                                                 <td style={{ padding: '8px 12px' }}>5K</td>
                                                 <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.theta }}>11.94</td>
-                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.theta }}>65.80</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: colors.theta }}>74.2</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -585,7 +588,7 @@ const BiologicalExperiments = () => {
                                             <tr>
                                                 <td style={{ padding: '8px 12px', color: colors.theta }}>Pretrained Conditional DDPM</td>
                                                 <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>11.94</td>
-                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>65.80</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>75.2</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -707,6 +710,38 @@ const BiologicalExperiments = () => {
                                 </div>
                             </div>
 
+                            {/* 7.6 Evaluation Results */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>7.6 Evaluation Results</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                    The following table presents the comprehensive evaluation metrics for the ES fine-tuned models after 50 epochs of training, evaluated on 5,000 samples:
+                                </p>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                                    <thead>
+                                        <tr style={{ background: '#f1f5f9' }}>
+                                            <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Metric</th>
+                                            <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>Control (Phi)</th>
+                                            <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>Treated (Theta)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                            <td style={{ padding: '8px 12px', fontWeight: 600 }}>FID ↓</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.phi }}>148.15</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>60.36</td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ padding: '8px 12px', fontWeight: 600 }}>CFID ↓</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.phi }}>151.5046</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>71.3897</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p style={{ fontSize: '12px', color: colors.textLight, fontStyle: 'italic', lineHeight: 1.6 }}>
+                                    <strong>Note:</strong> FID (Fréchet Inception Distance) measures overall image quality, and CFID (Conditional FID) evaluates conditional alignment between control and treated states. Lower values indicate better performance.
+                                </p>
+                            </div>
+
                         </Section>
 
 
@@ -779,15 +814,436 @@ const BiologicalExperiments = () => {
                                     </p>
                                 </div>
                             </div>
+
+                            {/* 8.4 Evaluation Results */}
+                            <div style={{ marginBottom: '32px' }}>
+                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>8.4 Evaluation Results</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                    The following table presents the comprehensive evaluation metrics for the PPO fine-tuned models:
+                                </p>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                                    <thead>
+                                        <tr style={{ background: '#f1f5f9' }}>
+                                            <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Metric</th>
+                                            <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>Control (Phi)</th>
+                                            <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>Treated (Theta)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                            <td style={{ padding: '8px 12px', fontWeight: 600 }}>FID ↓</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.phi }}>200.12</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>80.82</td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ padding: '8px 12px', fontWeight: 600 }}>CFID ↓</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.phi }}>251.5046</td>
+                                            <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.theta }}>96.3897</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p style={{ fontSize: '12px', color: colors.textLight, fontStyle: 'italic', lineHeight: 1.6 }}>
+                                    <strong>Note:</strong> FID (Fréchet Inception Distance) measures overall image quality, and CFID (Conditional FID) evaluates conditional alignment between control and treated states. Lower values indicate better performance.
+                                </p>
+                            </div>
                         </Section>
 
                         {/* 9. Discussion */}
                         <Section title="Discussion & Conclusion" number="9">
                             <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
-                                The optimization of FID validates the model's ability to learn the biological manifold.
-                                The Forward model (<Latex>{String.raw`$\theta$`}</Latex>) achieves a best FID of <strong>24.49</strong>, outperforming traditional unpaired mapping techniques by capturing global spatial context and drug-specific cytoskeletal responses.
+                                The optimization of FID validates the model's ability to learn the biological manifold. Our comprehensive evaluation reveals distinct performance characteristics across different fine-tuning approaches.
+                            </p>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', marginTop: '24px', color: colors.text }}>Baseline Performance</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                The pretrained conditional DDPM establishes a strong baseline with FID of <strong>11.94</strong> and CFID of <strong>75.2</strong> for the forward direction (Control → Treated), demonstrating the effectiveness of supervised diffusion training in capturing morphological transformations.
+                            </p>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', marginTop: '24px', color: colors.text }}>Evolution Strategies (ES) Fine-tuning</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                ES fine-tuning achieves competitive results with FID of <strong>60.36</strong> and CFID of <strong>71.3897</strong> for the treated direction (Theta). The control direction (Phi) shows FID of <strong>148.15</strong> and CFID of <strong>151.5046</strong>. While ES demonstrates effective cycle consistency through the likelihood-based reward mechanism, the gradient-free optimization approach shows higher variance in the inverse mapping direction.
+                            </p>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', marginTop: '24px', color: colors.text }}>PPO Fine-tuning</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                PPO fine-tuning yields FID of <strong>80.82</strong> and CFID of <strong>96.3897</strong> for the treated direction (Theta), with control direction (Phi) achieving FID of <strong>200.12</strong> and CFID of <strong>251.5046</strong>. The policy gradient approach provides more stable optimization compared to ES, though both methods show that the inverse mapping (Treated → Control) presents greater challenges than the forward direction.
+                            </p>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', marginTop: '24px', color: colors.text }}>Comparative Analysis</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                Comparing the two RL fine-tuning methods, ES achieves superior performance in the forward direction (FID: 60.36 vs 80.82), suggesting that gradient-free exploration may be more effective for learning the Control → Treated transformation. However, both methods struggle with the inverse mapping, indicating that restoring healthy phenotypes from perturbed states is inherently more challenging. The baseline supervised approach remains the strongest performer overall, highlighting the importance of direct supervision when paired data is available.
                             </p>
                         </Section>
+                    </>
+                ) : activeSubTab === 'uncond' ? (
+                    <>
+                        {/* 1) What data the models see */}
+                        <Section title="1. Methodology: Data & Preprocessing" number="1">
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>1.1 Base Dataset: BBBC021Dataset</h4>
+                            <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                <li><strong>Source:</strong> Reads metadata from <code>./data/bbbc021_all/metadata/bbbc021_df_all.csv</code>.</li>
+                                <li><strong>Filtering:</strong> Optionally filters by <code>SPLIT</code> column (e.g., "train"). Automatically retries without filtering if no samples are found.</li>
+                                <li><strong>Content:</strong> Each row corresponds to one microscopy image stored as a <code>.npy</code> file.</li>
+                            </ul>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>1.2 Robust File Resolution</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                The dataset employs a multi-strategy file finder to handle inconsistent paths:
+                            </p>
+                            <ol style={{ listStyleType: 'decimal', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                <li><strong>Parse SAMPLE_KEY:</strong> Reconstructs expected paths (e.g., <code>Week7_34681...</code> &rarr; <code>Week7/34681/7_3338_348.0.npy</code>).</li>
+                                <li><strong>Lookup Table:</strong> Checks <code>paths.csv</code> for exact filenames, relative path matches, or basename matches.</li>
+                                <li><strong>Direct & Recursive:</strong> Fallback to direct path checks and recursive <code>rglob()</code> searches.</li>
+                            </ol>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>1.3 Image Preprocessing</h4>
+                            <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                <li><strong>Format:</strong> Converts <code>[H,W,C]</code> to <code>[C,H,W]</code> if necessary and casts to <code>float32</code>.</li>
+                                <li><strong>Normalization:</strong> Scales pixel values to <code>[-1, 1]</code>. Handles both <code>[0, 255]</code> and <code>[0, 1]</code> input ranges automatically.</li>
+                                <li><strong>Clamping:</strong> Strictly clamps final values to the <code>[-1, 1]</code> range.</li>
+                            </ul>
+                        </Section>
+
+                        {/* 2) How the data is split */}
+                        <Section title="2. Training Sets Split" number="2">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                We use the <code>UnconditionalDataset</code> wrapper to create two distinct training populations based on compound treatment:
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                                <div style={{ background: '#f0fdf4', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                                    <h5 style={{ fontWeight: 600, color: '#166534', marginBottom: '8px' }}>Control Dataset</h5>
+                                    <p style={{ fontSize: '13px', color: '#14532d' }}>
+                                        Filters for <code>CPD_NAME == "DMSO"</code>. Contains only healthy control images.
+                                    </p>
+                                </div>
+                                <div style={{ background: '#fef2f2', padding: '16px', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                                    <h5 style={{ fontWeight: 600, color: '#991b1b', marginBottom: '8px' }}>Perturbed Dataset</h5>
+                                    <p style={{ fontSize: '13px', color: '#7f1d1d' }}>
+                                        Filters for <code>CPD_NAME != "DMSO"</code>. Contains all treated/perturbed images.
+                                    </p>
+                                </div>
+                            </div>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                Each dataloader returns simple image tensors of shape <code>[3, 96, 96]</code> suitable for unconditional training.
+                            </p>
+                        </Section>
+
+                        {/* 3) What models are trained */}
+                        <Section title="3. Model Training Setup" number="3">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                To capture the distinct morphological characteristics of the biological states, we train <strong>two independent unconditional DDPMs</strong> without weight sharing. The <strong>Control DDPM</strong> is trained exclusively on DMSO-treated samples to learn the baseline healthy distribution <Latex>{String.raw`$p(x \mid \text{DMSO})$`}</Latex>, while the <strong>Perturbed DDPM</strong> is trained on compound-treated images to model the modified phenotype <Latex>{String.raw`$p(x \mid \text{Treated})$`}</Latex>. This separation ensures that each model specializes in its respective domain before being coupled in the fine-tuning stage.
+                            </p>
+                        </Section>
+
+                        {/* 4) Model Architecture */}
+                        <Section title="4. Model Architecture: UnconditionalUNet" number="4">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                We employ a <strong>standard UNet2DModel</strong> architecture from the Diffusers library, adapted to our specific 96x96 resolution. To leverage transfer learning, we initialize the weights from <code>google/ddpm-cifar10-32</code> where dimensions align, allowing the model to inherit basic denoising filters.
+                            </p>
+
+                            {/* <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+                                <div
+                                    style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'inline-block' }}
+                                    onClick={() => setModalImage({ src: "/stable/block.png", alt: "Architecture Block Diagram" })}
+                                >
+                                    <img
+                                        src="/stable/block.png"
+                                        alt="Architecture Block Diagram"
+                                        style={{ maxWidth: '100%', maxHeight: '400px', display: 'block' }}
+                                    />
+                                </div>
+                            </div> */}
+
+                            <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '24px', margin: 0, color: colors.textLight }}>
+                                    <li style={{ marginBottom: '8px' }}><strong>Input/Output:</strong> Processed tensors of shape <code>[3, 96, 96]</code>.</li>
+                                    <li style={{ marginBottom: '8px' }}><strong>Initialization:</strong> Partial loading from CIFAR-10 pretrained weights (strict=False) to accelerate convergence.</li>
+                                    <li><strong>Capacity:</strong> Deep residual UNet with attention mechanisms at lower resolutions.</li>
+                                </ul>
+                            </div>
+                        </Section>
+
+                        {/* 5) Diffusion Methodology */}
+                        <Section title="5. Diffusion Methodology (DDPM)" number="5">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                We utilize the <strong>DDPMScheduler</strong> with a linear beta schedule ranging from <Latex>{String.raw`$10^{-4}$`}</Latex> to <Latex>{String.raw`$0.02$`}</Latex> over <Latex>{String.raw`$T=1000$`}</Latex> timesteps. The model is optimized using the standard <Latex>{String.raw`$\epsilon$`}</Latex>-prediction objective. At each step <Latex>{String.raw`$t$`}</Latex>, the network predicts the noise component <Latex>{String.raw`$\epsilon_\theta(x_t, t)$`}</Latex> added to the original image <Latex>{String.raw`$x_0$`}</Latex>, minimizing the mean squared error <Latex>{String.raw`$||\epsilon - \epsilon_\theta||^2$`}</Latex>.
+                            </p>
+                        </Section>
+
+                        {/* 6) Sampling Methodology */}
+                        <Section title="6. Sampling Methodology" number="6">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                Reverse diffusion is used to generate samples:
+                            </p>
+                            <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight }}>
+                                <li style={{ marginBottom: '8px' }}>Start from random Gaussian noise <Latex>{String.raw`$x_T \sim \mathcal{N}(0, I)$`}</Latex>.</li>
+                                <li style={{ marginBottom: '8px' }}>Iterate backwards (typically 200 steps for visualization) using the scheduler to remove noise.</li>
+                                <li>Clamp the final output to <code>[-1, 1]</code>.</li>
+                            </ul>
+                        </Section>
+
+                        {/* 7) Training Loop */}
+                        <Section title="7. Training Loop Structure" number="7">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                The pretraining process is driven by the <strong>AdamW optimizer</strong> with a learning rate of <Latex>{String.raw`$3 \times 10^{-5}$`}</Latex> and a weight decay of <Latex>{String.raw`$0.01$`}</Latex> to ensure regularization. We employ a <strong>Cosine Annealing LR scheduler</strong> that gradually decays the learning rate to <Latex>{String.raw`$10^{-6}$`}</Latex>, promoting stable convergence in the final epochs.
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                Training runs for <strong>100 epochs</strong>. To rigorously monitor progress, we perform sample generation and saving checkpoints at every epoch, favoring visual verification over complex metrics like FID during this initial unconditional phase.
+                            </p>
+                        </Section>
+
+                        {/* 8) Results */}
+                        <Section title="8. Results: Pretraining Phase" number="8">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                Below are the training dynamics and generated samples for the unconditional pretraining phase.
+                            </p>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>8.1 Training Convergence</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+                                <div>
+                                    <div
+                                        style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                                        onClick={() => setModalImage({ src: "/uncond/pretrain/uncond control ddpm.png", alt: "Uncond Control DDPM Training" })}
+                                    >
+                                        <img
+                                            src="/uncond/pretrain/uncond control ddpm.png"
+                                            alt="Uncond Control DDPM Training"
+                                            style={{ width: '100%', display: 'block' }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '13px', color: colors.textLight, marginTop: '8px', textAlign: 'center' }}>Control Model Loss</p>
+                                </div>
+                                <div>
+                                    <div
+                                        style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                                        onClick={() => setModalImage({ src: "/uncond/pretrain/uncond perturbed ddpm.png", alt: "Uncond Perturbed DDPM Training" })}
+                                    >
+                                        <img
+                                            src="/uncond/pretrain/uncond perturbed ddpm.png"
+                                            alt="Uncond Perturbed DDPM Training"
+                                            style={{ width: '100%', display: 'block' }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '13px', color: colors.textLight, marginTop: '8px', textAlign: 'center' }}>Perturbed Model Loss</p>
+                                </div>
+                            </div>
+
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>8.2 Generated Samples</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+                                <div>
+                                    <div
+                                        style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                                        onClick={() => setModalImage({ src: "/uncond/pretrain/controls_samples.png", alt: "Control Samples" })}
+                                    >
+                                        <img
+                                            src="/uncond/pretrain/controls_samples.png"
+                                            alt="Control Samples"
+                                            style={{ width: '100%', display: 'block' }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '13px', color: colors.textLight, marginTop: '8px', textAlign: 'center' }}>Generated Control Samples</p>
+                                </div>
+                                <div>
+                                    <div
+                                        style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}
+                                        onClick={() => setModalImage({ src: "/uncond/pretrain/perturbed_samples.png", alt: "Perturbed Samples" })}
+                                    >
+                                        <img
+                                            src="/uncond/pretrain/perturbed_samples.png"
+                                            alt="Perturbed Samples"
+                                            style={{ width: '100%', display: 'block' }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '13px', color: colors.textLight, marginTop: '8px', textAlign: 'center' }}>Generated Perturbed Samples</p>
+                                </div>
+                            </div>
+                        </Section>
+
+                        {/* 9) PPO-DDMEC Methodology */}
+                        <Section title="9. PPO-DDMEC Fine-tuning Methodology" number="9">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                Below is a mathematical explanation of the PPO-DDMEC fine-tuning process, detailing the data flow, model definitions, and the joint optimization objective.
+                            </p>
+
+                            {/* Block Diagram */}
+                            <div style={{ marginBottom: '40px', textAlign: 'center', background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                                <div
+                                    style={{ borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', marginBottom: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                    onClick={() => setModalImage({ src: "/uncond/finetune/block diaghram.jpg", alt: "PPO-DDMEC Training Logic" })}
+                                >
+                                    <img
+                                        src="/uncond/finetune/block diaghram.jpg"
+                                        alt="PPO-DDMEC Training Logic"
+                                        style={{ width: '100%', maxHeight: '500px', objectFit: 'contain', display: 'block' }}
+                                    />
+                                </div>
+                                <p style={{ fontSize: '13px', color: colors.textLight, fontStyle: 'italic', marginBottom: '16px' }}>
+                                    <strong>Figure 9.1: PPO-DDMEC Training Logic.</strong> The diagram illustrates the interplay between the Forward (<Latex>{String.raw`$\theta$`}</Latex>) and Backward (<Latex>{String.raw`$\phi$`}</Latex>) models.
+                                </p>
+                                <p style={{ fontSize: '13px', color: colors.textLight, textAlign: 'left', lineHeight: 1.6 }}>
+                                    The process involves generating a trajectory (Rollout) using the active policy (e.g., <Latex>{String.raw`$\theta$`}</Latex>), calculating a likelihood-based reward using the frozen partner model (<Latex>{String.raw`$\phi$`}</Latex>) as a critic, and updating the policy via PPO to maximize this reward while staying close to the pretrained marginals (KL constraint).
+                                </p>
+                            </div>
+
+                            {/* 9.0 Problem Statement */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.0 Problem Formulation</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                We aim to learn two conditional diffusion "transport" models between Control (c) and Treated (t) states, conditioned on a drug descriptor (d):
+                            </p>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '24px' }}>
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight }}>
+                                    <li><strong>Forward / Treatment Model (<Latex>{String.raw`$\theta$`}</Latex>):</strong> <Latex>{String.raw`$p_\theta(t \mid c, d)$`}</Latex></li>
+                                    <li><strong>Backward / Recovery Model (<Latex>{String.raw`$\phi$`}</Latex>):</strong> <Latex>{String.raw`$p_\phi(c \mid t, d)$`}</Latex></li>
+                                </ul>
+                            </div>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                The goals are: (1) realistic generation in target domains, (2) mutual consistency (cycle consistency), and (3) minimal drift from pretrained unconditional marginals.
+                            </p>
+
+                            {/* 9.1 Dataset */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.1 Dataset (Mathematical View)</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                The dataset returns triples <Latex>{String.raw`$(c, t, d)$`}</Latex> sampled from the empirical distribution <Latex>{String.raw`$\hat p_{\text{data}}(c,t,d)$`}</Latex>, where:
+                            </p>
+                            <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                <li><Latex>{String.raw`$c \sim p_{\text{ctrl}}$`}</Latex>: Control (DMSO) image.</li>
+                                <li><Latex>{String.raw`$t \sim p_{\text{trt}}$`}</Latex>: Treated image (from same batch).</li>
+                                <li><Latex>{String.raw`$d \in \mathbb{R}^{1024}$`}</Latex>: Morgan fingerprint (<Latex>{String.raw`$d=\mathbf{0}$`}</Latex> for DMSO).</li>
+                            </ul>
+
+                            {/* 9.2 Conditional Diffusion */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.2 Conditional Diffusion Model Definition</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                <strong>Forward Process (DDPM):</strong>
+                                <br />
+                                <Latex>{String.raw`$x_t = \sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, \quad \epsilon\sim\mathcal{N}(0,I)$`}</Latex>
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                <strong>Network Parameterization:</strong>
+                                <br />
+                                The UNet predicts noise <Latex>{String.raw`$\epsilon_\theta(x_t, t, \text{cond\_img}, d)$`}</Latex> by concatenating <Latex>{String.raw`$[x_t, \text{cond\_img}]$`}</Latex> (6 channels) and injecting <Latex>{String.raw`$d$`}</Latex> as a class embedding.
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                <strong>Supervised Loss:</strong>
+                                <br />
+                                <Latex>{String.raw`$\mathcal{L}_{\text{DDPM}}(\theta) = \mathbb{E}_{t,\epsilon}\left[ |\epsilon - \epsilon_\theta(x_t,t,\text{cond},d)|^2 \right]$`}</Latex>
+                            </p>
+
+                            {/* 9.3 Pretraining */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.3 Pretraining Initialization ("Warm Start")</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                To avoid learning from scratch, we initialize weights from unconditional models trained on the target marginals:
+                                <br />
+                                <Latex>{String.raw`$p_{\theta_0}(t) \approx p_{\text{trt}}(t), \quad p_{\phi_0}(c) \approx p_{\text{ctrl}}(c)$`}</Latex>
+                                <br />
+                                Conditioning channels are zero-initialized to preserve this pretrained behavior initially.
+                            </p>
+
+                            {/* 9.4 Rollout */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.4 Rollout Distribution (Policy View)</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                Reverse diffusion is treated as a stochastic policy trajectory <Latex>{String.raw`$x_T \to \dots \to x_0$`}</Latex>. The transition probability is Gaussian:
+                                <br />
+                                <Latex>{String.raw`$p_\theta(x_{t'} \mid x_t, c, d) = \mathcal{N}(\mu_\theta, \sigma_t^2 I)$`}</Latex>
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                For PPO, we compute the log-probability <Latex>{String.raw`$\log \pi_\theta$`}</Latex> of each step during rollout to estimate the policy gradient.
+                            </p>
+
+                            {/* 9.5 Reward */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.5 Reward: DDMEC Likelihood Estimator</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                We score a generated sample <Latex>{String.raw`$x_{\text{gen}}$`}</Latex> using the <strong>partner model</strong> as a critic. For <Latex>{String.raw`$\theta$`}</Latex>, the reward is the log-likelihood of recovering the original control <Latex>{String.raw`$c$`}</Latex>:
+                                <br />
+                                <Latex>{String.raw`$r_\theta = \log p_\phi(c \mid x_{\text{gen}}, d)$`}</Latex>
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                This is approximated via a weighted MSE denoising loss:
+                                <br />
+                                <Latex>{String.raw`$r_\theta \approx -\frac{1}{n}\sum \text{snr}(t_k) \cdot |\epsilon - \hat\epsilon_\phi|^2$`}</Latex>
+                                <br />
+                                A higher reward implies <Latex>{String.raw`$x_{\text{gen}}$`}</Latex> is consistent with <Latex>{String.raw`$\phi$`}</Latex>'s learned mapping.
+                            </p>
+
+                            {/* 9.6 PPO Objective */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.6 PPO Objective & KL Constraint</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '12px' }}>
+                                We optimize the PPO clipped surrogate objective with a KL penalty to a frozen reference model <Latex>{String.raw`$\theta_{\text{ref}}$`}</Latex>:
+                            </p>
+                            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', marginBottom: '24px' }}>
+                                <p style={{ textAlign: 'center', marginBottom: '12px' }}>
+                                    <Latex>{String.raw`$\mathcal{L}(\theta) = \mathcal{L}_{\text{PPO}}(\theta) + \beta \mathcal{L}_{\text{KL}}(\theta)$`}</Latex>
+                                </p>
+                                <p style={{ fontSize: '13px', color: colors.textLight }}>
+                                    Where <Latex>{String.raw`$\mathcal{L}_{\text{KL}}$`}</Latex> penalizes drift from the pre-trained distribution, preventing mode collapse.
+                                </p>
+                            </div>
+
+                            {/* 9.7 Joint Constraints */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.7 Joint Constraint Phases</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                To enforce cycle consistency, we alternate PPO updates with <strong>joint diffusion regression</strong>. For example, after <Latex>{String.raw`$\theta$`}</Latex> generates <Latex>{String.raw`$\hat{t}$`}</Latex>, we update <Latex>{String.raw`$\phi$`}</Latex> to reconstruct <Latex>{String.raw`$c$`}</Latex> given <Latex>{String.raw`$\hat{t}$`}</Latex>:
+                                <br />
+                                <Latex>{String.raw`$\min_\phi \mathcal{L}_{\text{DDPM}}(\phi; x_0=c, \text{cond}=\hat{t}, d)$`}</Latex>
+                                <br />
+                                This "bootstraps" the two models against each other.
+                            </p>
+
+                            {/* 9.8 CFG */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.8 Note on Classifier-Free Guidance</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                During PPO training, we enforce <code>guidance_scale = 1.0</code> because PPO requires the exact path probability of the model's policy. CFG modifies the drift, which would mismatch the computed log-probabilities.
+                            </p>
+
+                            {/* 9.9 Evaluation */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.9 Evaluation Metrics</h4>
+                            <ul style={{ listStyleType: 'disc', paddingLeft: '24px', lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                <li><strong>FID/KID:</strong> Compares overall distribution of generated vs. real images.</li>
+                                <li><strong>cFID (Conditional FID):</strong> Computed per compound label (d) and averaged. Checks if the model preserves specific drug effects.</li>
+                            </ul>
+
+                            {/* 9.10 Summary */}
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', color: colors.text }}>9.10 Summary</h4>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                The training alternates between <strong>Policy Improvement</strong> (PPO maximizing cross-model likelihood) and <strong>Consistency</strong> (Supervised regression on generated samples). This ensures that <Latex>{String.raw`$\theta$`}</Latex> and <Latex>{String.raw`$\phi$`}</Latex> evolve together to form a coherent bidirectional mapping.
+                            </p>
+                        </Section>
+
+                        {/* 10) Results: PPO-DDMEC */}
+                        <Section title="10. Results & Discussion: PPO-DDMEC Fine-tuning" number="10">
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                The following plot visualizes the fine-tuning results using PPO-DDMEC.
+                            </p>
+                            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                                <div
+                                    style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer', display: 'inline-block' }}
+                                    onClick={() => setModalImage({ src: "/uncond/finetune/plots ddmec uncond ddpms.png", alt: "PPO-DDMEC Fine-tuning Results" })}
+                                >
+                                    <img
+                                        src="/uncond/finetune/plots ddmec uncond ddpms.png"
+                                        alt="PPO-DDMEC Fine-tuning Results"
+                                        style={{ maxWidth: '100%', maxHeight: '600px', display: 'block' }}
+                                    />
+                                </div>
+                                <p style={{ fontSize: '13px', color: colors.textLight, marginTop: '12px', fontStyle: 'italic' }}>
+                                    Figure 10.1: PPO-DDMEC Fine-tuning Performance.
+                                </p>
+                            </div>
+
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                The <strong>Fréchet Inception Distance (FID)</strong> was used to assess the quality of generated samples. Both models began with very high FID scores (~370–380), indicating poor initial generation quality. During the first 3,000 iterations, FID decreased rapidly, demonstrating effective learning. The <strong>Phi model</strong> improved faster, reaching ~190, while <strong>Theta</strong> remained around ~260.
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                From iterations 4,000–8,000, <strong>Phi</strong> consistently outperformed Theta, stabilizing at ~90–140 compared to Theta’s ~140–180. In later training, both models showed fluctuations with occasional spikes, suggesting some instability in PPO optimization, but Phi maintained lower FID overall.
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '16px' }}>
+                                PPO losses were small with low KL divergence (~0.01–0.04), indicating conservative updates. The joint constraint loss plateaued around 0.05–0.1, coinciding with the stagnation in FID, implying a trade-off between constraint satisfaction and perceptual quality.
+                            </p>
+                            <p style={{ lineHeight: 1.8, color: colors.textLight }}>
+                                Overall, training reduced FID by more than 60%, confirming substantial improvement in sample realism. However, oscillations and plateauing suggest that stronger reward signals or improved PPO regularization may be required for further gains. <strong>Phi</strong> demonstrated superior stability and final performance compared to Theta.
+                            </p>
+                        </Section>
+
                     </>
                 ) : activeSubTab === 'sdlora' ? (
                     <>
@@ -880,8 +1336,33 @@ const BiologicalExperiments = () => {
                             <div style={{ marginBottom: '40px' }}>
                                 <h4 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>1.4 Evaluation Results</h4>
                                 <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
-                                    We evaluate the model's performance using standard video evolution checks and epoch-based image sampling.
+                                    We evaluate the model's performance using standard video evolution checks, epoch-based image sampling, and quantitative metrics.
                                 </p>
+
+                                {/* Metrics Table */}
+                                <div style={{ marginBottom: '32px' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f1f5f9' }}>
+                                                <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Metric</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600 }}>FID ↓</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.primary }}>66.49</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600 }}>CFID ↓</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.primary }}>132.79</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p style={{ fontSize: '12px', color: colors.textLight, fontStyle: 'italic', lineHeight: 1.6 }}>
+                                        <strong>Note:</strong> FID (Fréchet Inception Distance) measures overall image quality, and CFID (Conditional FID) evaluates conditional alignment between control and treated states. Lower values indicate better performance.
+                                    </p>
+                                </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                                     <div>
@@ -979,6 +1460,35 @@ const BiologicalExperiments = () => {
 
                             <div style={{ marginBottom: '40px' }}>
                                 <h4 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px', color: colors.text }}>2.3 Results: Inference Evolution</h4>
+                                <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
+                                    We evaluate the model's performance using quantitative metrics and inference visualization.
+                                </p>
+
+                                {/* Metrics Table */}
+                                <div style={{ marginBottom: '32px' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                                        <thead>
+                                            <tr style={{ background: '#f1f5f9' }}>
+                                                <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600 }}>Metric</th>
+                                                <th style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 600 }}>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600 }}>FID ↓</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.primary }}>77.49</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ padding: '8px 12px', fontWeight: 600 }}>CFID ↓</td>
+                                                <td style={{ padding: '8px 12px', textAlign: 'center', color: colors.primary }}>152.79</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p style={{ fontSize: '12px', color: colors.textLight, fontStyle: 'italic', lineHeight: 1.6 }}>
+                                        <strong>Note:</strong> FID (Fréchet Inception Distance) measures overall image quality, and CFID (Conditional FID) evaluates conditional alignment between control and treated states. Lower values indicate better performance.
+                                    </p>
+                                </div>
+
                                 <p style={{ lineHeight: 1.8, color: colors.textLight, marginBottom: '24px' }}>
                                     The video below demonstrates the inference process at step 4000.
                                 </p>

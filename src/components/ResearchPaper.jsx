@@ -38,9 +38,7 @@ const ResearchPaper = () => {
       {/* Header - Common for all tabs */}
       <header style={{ background: 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)', padding: '60px 24px', color: 'white' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', padding: '6px 16px', borderRadius: '20px', fontSize: '13px', marginBottom: '20px' }}>
-            ICML 2025 Workshop · Computational Biology
-          </div>
+        
           <h1 style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1.2, marginBottom: '24px' }}>
             Evolution Strategies vs PPO for Cellular Morphology Prediction: BBBC021 Study
           </h1>
