@@ -179,10 +179,10 @@ const PresentationMode = ({ onExit }) => {
                 <li>Action: <Latex>{`$a_t = x_{t-1}$`}</Latex></li>
                 <li>Policy: <Latex>{`$\\pi_\\theta(a_t|s_t) = p_\\theta(x_{t-1}\\mid x_t, \\text{cond})$`}</Latex></li>
             </ul>
-            <p>For each step, policy is Gaussian:</p>
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
+            <p> Reverse diffusion = a Gaussian policy that outputs the next denoised image, enabling PPO to use analytic log-probs and KL to optimize the denoising trajectory with rewards.</p>
+            {/* <div style={{ textAlign: 'center', margin: '20px 0' }}>
                 <Latex>{`$p_\\theta(x_{t-1}\\mid x_t)=\\mathcal{N}\\big(\\mu_\\theta(x_t,t,\\text{cond}),\\sigma_t^2 I\\big)$`}</Latex>
-            </div>
+            </div> */}
             <p>So we can compute <Latex>{`$\\log \\pi_\\theta(a_t|s_t)$`}</Latex> and KL analytically.</p>
         </Slide>,
 
@@ -196,7 +196,7 @@ const PresentationMode = ({ onExit }) => {
             <div style={{ textAlign: 'center', margin: '20px 0' }}>
                 <Latex>{`$\\mathcal{L}_{\\text{PPO}}(\\theta)=\\mathbb{E}\\left[\\min\\left(r_tA_t,\\;\\text{clip}(r_t,1-\\epsilon,1+\\epsilon)A_t\\right)\\right]$`}</Latex>
             </div>
-            <p><strong>Update:</strong> gradient-based backprop through <Latex>{`$\\mathcal{L}$`}</Latex>.</p>
+            <p><strong>PPO updates the diffusion model by clipping the policy ratio and maximizing expectation by backprop.</p>
         </Slide>,
 
         // Slide 10: ES Update
@@ -208,6 +208,7 @@ const PresentationMode = ({ onExit }) => {
             </div>
             <p>Variance reduction: antithetic pairs <Latex>{`$\\epsilon, -\\epsilon$`}</Latex>.</p>
             <p><strong>Update:</strong> <Latex>{`$\\theta \\leftarrow \\theta + \\alpha \\cdot \\text{Adam}(\\nabla_\\theta J)$`}</Latex></p>
+        <p>ES optimizes the exact same objective as PPO, including the KL constraint computed on the rollout states.</p>
         </Slide>,
 
         // Slide 11: PPO vs ES
