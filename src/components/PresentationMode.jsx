@@ -196,7 +196,7 @@ const PresentationMode = ({ onExit }) => {
             <div style={{ textAlign: 'center', margin: '20px 0' }}>
                 <Latex>{`$\\mathcal{L}_{\\text{PPO}}(\\theta)=\\mathbb{E}\\left[\\min\\left(r_tA_t,\\;\\text{clip}(r_t,1-\\epsilon,1+\\epsilon)A_t\\right)\\right]$`}</Latex>
             </div>
-            <p><strong>PPO updates the diffusion model by clipping the policy ratio and maximizing expectation by backprop.</p>
+            <p>PPO updates the diffusion model by clipping the policy ratio and maximizing expectation by backprop.</p>
         </Slide>,
 
         // Slide 10: ES Update
