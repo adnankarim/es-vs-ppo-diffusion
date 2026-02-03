@@ -30,7 +30,7 @@ const TabButton = ({ active, onClick, children }) => (
   </button>
 );
 
-const ResearchPaper = () => {
+const ResearchPaper = ({ onEnterPresentation }) => {
   const [activeTab, setActiveTab] = useState('biological');
 
   return (
@@ -38,16 +38,33 @@ const ResearchPaper = () => {
       {/* Header - Common for all tabs */}
       <header style={{ background: 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)', padding: '60px 24px', color: 'white' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        
+
           <h1 style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1.2, marginBottom: '24px' }}>
             Evolution Strategies vs PPO for Cellular Morphology Prediction: BBBC021 Study
           </h1>
           <p style={{ fontSize: '1.1rem', opacity: 0.9, maxWidth: '700px', lineHeight: 1.6 }}>
             Diffusion-based minimum entropy coupling for drug-induced cellular morphology prediction
           </p>
-          <div style={{ marginTop: '32px', display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '14px', opacity: 0.85 }}>
+          <div style={{ marginTop: '32px', display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '14px', opacity: 0.85, alignItems: 'center' }}>
             <span>📊 97,504 images</span>
             <span>💊 35 compounds</span>
+            <button
+              onClick={onEnterPresentation}
+              style={{
+                marginLeft: 'auto',
+                padding: '8px 16px',
+                background: 'rgba(255,255,255,0.2)',
+                border: '1px solid rgba(255,255,255,0.4)',
+                borderRadius: '20px',
+                color: 'white',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              ▶ Start Presentation
+            </button>
           </div>
         </div>
       </header>

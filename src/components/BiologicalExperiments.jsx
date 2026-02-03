@@ -79,16 +79,16 @@ const BiologicalExperiments = () => {
                 {/* Sub-Tab Navigation */}
                 <div style={{ display: 'flex', background: '#f8fafc', padding: '6px', borderRadius: '10px', marginBottom: '32px', width: 'fit-content', border: '1px solid #e2e8f0' }}>
                     <SubTabButton active={activeSubTab === 'ddpm'} onClick={() => setActiveSubTab('ddpm')}>
-                        DDPM & MEC
+                        Cond DDPM & MEC
                     </SubTabButton>
                     <SubTabButton active={activeSubTab === 'uncond'} onClick={() => setActiveSubTab('uncond')}>
-                        Uncond DDPM & PPO
+                        Uncond DDPM & MEC
                     </SubTabButton>
                     <SubTabButton active={activeSubTab === 'flux'} onClick={() => setActiveSubTab('flux')}>
-                        Flux Matching
+                        Flux 12B + LoRA + ControlNet
                     </SubTabButton>
                     <SubTabButton active={activeSubTab === 'sdlora'} onClick={() => setActiveSubTab('sdlora')}>
-                        SD LoRA
+                        Stable Diffusion + LoRA + ControlNet
                     </SubTabButton>
                 </div>
 
@@ -1366,7 +1366,7 @@ const BiologicalExperiments = () => {
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                                     <div>
-                                        <h5 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '12px', color: colors.textLight }}>Training Evolution Video</h5>
+                                        <h5 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '12px', color: colors.textLight }}>Prediction Video</h5>
                                         <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
                                             <video
                                                 controls
